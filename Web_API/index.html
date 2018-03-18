@@ -321,22 +321,22 @@
           for (let i in mine.DeniedAlternatives)
             if ($.inArray(mine.DeniedAlternatives[i], result.DeniedAlternatives) == -1)
               result.DeniedAlternatives.push(mine.DeniedAlternatives[i])
-          if (mine.Texts.Chs)
+          if (mine.Texts.Por)
           {
-            if ($.inArray(mine.Texts.Chs, result.DeniedAlternatives) !== -1)
-              alert("Texto atual"+mine.Texts.Chs+"Conflito"+
+            if ($.inArray(mine.Texts.Por, result.DeniedAlternatives) !== -1)
+              alert("Texto atual"+mine.Texts.Por+"Conflito"+
                 "Ignorar!")
-            else if ((! result.Texts.Chs) || result.Texts.Chs.length == 0)
-              result.Texts.Chs = mine.Texts.Chs
-            else if (result.Texts.Chs !== mine.Texts.Chs)
+            else if ((! result.Texts.Por) || result.Texts.Por.length == 0)
+              result.Texts.Por = mine.Texts.Por
+            else if (result.Texts.Por !== mine.Texts.Por)
             {
-              popupConflict(mine.Texts.Chs, result.Texts.Chs).then(function(ans)
+              popupConflict(mine.Texts.Por, result.Texts.Por).then(function(ans)
                 {
-                  if (result.Texts.Chs !== ans)
-                    result.DeniedAlternatives.push(result.Texts.Chs)
+                  if (result.Texts.Por !== ans)
+                    result.DeniedAlternatives.push(result.Texts.Por)
                   else
-                    result.DeniedAlternatives.push(mine.Texts.Chs)
-                  result.Texts.Chs = ans
+                    result.DeniedAlternatives.push(mine.Texts.Por)
+                  result.Texts.Por = ans
                   ok(result)
                 })
               return
@@ -386,8 +386,8 @@
       for (let i in newjson)
       {
         var field = newjson[i]
-        if (typeof field['Texts']['Chs'] == "string" &&
-          field['Texts']['Chs'].length > 0)
+        if (typeof field['Texts']['Por'] == "string" &&
+          field['Texts']['Por'].length > 0)
           translated++
       }
       let content = JSON.stringify(newjson, null, 2)

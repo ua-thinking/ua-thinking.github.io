@@ -71,7 +71,7 @@ const schema = {
             title: "Texto em inglês",
             format: "textarea",
           },
-          "Chs": {
+          "Por": {
             type: "string",
             title: "Texto em portugues",
             format: "textarea",
@@ -80,7 +80,7 @@ const schema = {
             },
           }
         },
-        default_properties: ["Chs", "Eng"]
+        default_properties: ["Por", "Eng"]
       },//Texts
     }
   }
@@ -133,9 +133,9 @@ theEditor.prototype.load_part = function (start)
   {
     var fixed_schema = schema
     var titletext = this.json[i]['Texts']['Eng']
-    if (! ('Chs' in this.json[i]['Texts']))
+    if (! ('Por' in this.json[i]['Texts']))
     {
-      this.json[i]['Texts']['Chs'] = ""
+      this.json[i]['Texts']['Por'] = ""
     }
     if (titletext.length > 16)
     {
@@ -160,13 +160,13 @@ theEditor.prototype.load_part = function (start)
     {
       function after_check(diff)
       {
-        $(ed.subeditors[ii].getEditor('root.Texts.Chs').container)
+        $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
           .find('#overflow-warning').remove()
         $(ed.subeditors[ii].root_container).find('#overflow-head').remove()
         if (diff > 0)
         {
           $(ed.subeditors[ii].root_container).addClass('alert-danger')
-          $(ed.subeditors[ii].getEditor('root.Texts.Chs').container)
+          $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
             .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
             ' '+ diff +'linhas extras!</p>')
           $(ed.subeditors[ii].root_container).children('h3')
@@ -179,7 +179,7 @@ theEditor.prototype.load_part = function (start)
       }
       return function(first)
       {
-        let curval = ed.subeditors[ii].getEditor('root.Texts.Chs').getValue()
+        let curval = ed.subeditors[ii].getEditor('root.Texts.Por').getValue()
         check_codex_length(curval, after_check)
         ed.touched = true
         if (first){ ed.touched = false}
@@ -187,8 +187,8 @@ theEditor.prototype.load_part = function (start)
     }
     let ccheck = generate_codex_checker(i)
     ccheck(true)
-    subeditor.watch('root.Texts.Chs', ccheck)
-    if (this.json[i]['Texts']['Chs'] === "")
+    subeditor.watch('root.Texts.Por', ccheck)
+    if (this.json[i]['Texts']['Por'] === "")
     {
       subeditor.root_container.className += ' alert-info'
     }
@@ -254,7 +254,7 @@ theEditor.prototype.json_onload = function (data)
   for (let i = 0 ; i < data.length; i += 1)
   {
     let texts = data[i]["Texts"]
-    let translated = ("Chs" in texts) && (texts["Chs"].length > 0)
+    let translated = ("Por" in texts) && (texts["Por"].length > 0)
     has_untranslated = has_untranslated || !translated
     if (ii == editors_per_page - 1 | i == data.length - 1)
     {
