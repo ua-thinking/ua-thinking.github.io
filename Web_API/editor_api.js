@@ -168,7 +168,7 @@ theEditor.prototype.load_part = function (start)
           $(ed.subeditors[ii].root_container).addClass('alert-danger')
           $(ed.subeditors[ii].getEditor('root.Texts.Chs').container)
             .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
-            ' Лишних строк: '+ diff +'!</p>')
+            ' '+ diff +'linhas extras!</p>')
           $(ed.subeditors[ii].root_container).children('h3')
           .append('<span id="overflow-head">O texto é muito longo!</span>')
         }

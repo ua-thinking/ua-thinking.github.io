@@ -31,7 +31,7 @@ GHAccount.prototype.rawRequest = function(url, type, data, onprogress)
   {
     let ajax = new XMLHttpRequest()
     ajax.open(type, api_prefix + url, true)
-    ajax.onerror = function(stat) {fail(ajax, stat, "Erro de conexão！")}
+    ajax.onerror = function(stat) {fail(ajax, stat, "Erro de conexão!")}
     if (typeof onprogress == "function")
       ajax.onprogress = function(pe)
       {
