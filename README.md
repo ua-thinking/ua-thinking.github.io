@@ -1,6 +1,6 @@
-juniordark.github.io/Web_API 
+https://juniordark.github.io/Starbound
 
-juniordark.github.io/FU
+https://juniordark.github.io/FU
 
-juniordark.github.io/json
+https://juniordark.github.io/json
 
