@@ -241,7 +241,7 @@
               })
             }
             let no_fork = function(a){
-              console.log("User has no fork")
+              console.log("O usuário não tem um fork")
               let forker = function()
               {
                 let fork_succeed = function(a) {
@@ -417,7 +417,7 @@
         console.log(status)
         console.log(errorThrown)
         $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Tente novamente " +
-          "Ocorreu um erro ao tentar salvar o arquivo" +
+          " Ocorreu um erro ao tentar salvar o arquivo" +
           (errorThrown ? errorThrown: "Erro desconhecido" ) + " Status: " +
           (status ? status: "Desconhecido" ) + "Informações adicionais:\n" +
           JSON.stringify({ajax:d, self:t}, null, 2)
@@ -436,7 +436,7 @@
         let upd_json = JSON.parse(Base64.decode(upd.content))
         let obj = editor.get_json()
         resolveConflict(obj, upd_json).then(finish).catch(function(reason){
-          alert('Os arquivos não podem ser combinados porque'+ reason +
+          alert('Os arquivos não podem ser combinados porque '+ reason +
             'as alterações serão descartadas')
           finish(upd_json)
         })
