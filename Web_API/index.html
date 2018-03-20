@@ -505,7 +505,7 @@
       var obj = $('#' + data.id)
       obj.width(data.val + '%')
       obj.attr('aria-valuenow', data.val)
-      obj.html(Math.floor(data.val) + '% переведено')
+      obj.html(Math.floor(data.val) + '% Traduzido')
       obj.removeClass()
       obj.addClass('progress-bar')
       if (data.val < 50)
@@ -522,7 +522,7 @@
   <header style='height: 100px' class='container'>
   <div class='row'>
     <div class='col-sm-6'>
-    <h1>Interface de Tradução</h1>
+    <h1>Tradução Starbound</h1>
      <div class="progress">
         <div class="progress-bar" role="progressbar" id='global-progress'
         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
@@ -593,7 +593,7 @@
       onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
       type="button">Voltar ao topo</button>
   <div id='authorized' style='display: none'></div>
-  <div id='auth-failed' style='display: none'>Falha na autorização!
+  <div id='auth-failed' style='display: none'>login falhou!
   <div><button class="btn btn-default" type="button"
     onclick="$('#auth-failed').slideUp(); $('#auth-form').slideDown()">
     Tente novamente</button></div></div>
@@ -648,16 +648,16 @@
   <div class="col-sm-12 alert alert-info" id="forkRequired"
   style="display:none;z-index:1">
   <p class="col-sm-8">Parece que você não é membro da equipe principal
-  dos tradutores SBT.
+  dos tradutores.
   Se você ainda quer traduzir, <a id="forkMeA">faça uma
   cópia pessoal da</a>
   tradução, traduza o tanto quanto você quiser, em seguida,
-  faça um pedido para mesclar sua cópia pessoal com a transferência
-  equipe SBT. Se o pedido for aprovado, você terá
+  faça um pedido para mesclar sua cópia pessoal com a tradução
+  principal. Se o pedido for aprovado, você terá
   a oportunidade de se juntar à equipe de tradutores. Você também pode
-  continue a transferência sem juntar-se à equipe, mas apenas periodicamente
+  continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
   enviando pedidos para fundir sua versão da tradução com uma tradução
-  da equipe SBT.</p>
+  principal.</p>
   <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
   cópia pessoal!</button>
   </div>
@@ -665,20 +665,20 @@
   style="display:none;z-index:1">
   <div class="col-sm-8">
   <p id="pullText">Agora você trabalha com sua cópia pessoal
-  da tradução.</p><p>Eu recomendo que você leia <a href="https://docs.google.com/spreadsheets/d/11wsdVB_vysNa-GrdEjqbt2yOJivNBQZkg_yX0A_hvso" target="_blank" class="gloshref">dicionário</a>, se você ainda não o fez. <p id="pullHint"> Faça
+  da tradução.</p><p>Eu recomendo que você leia <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">a descrição</a>, se você ainda não o fez. <p id="pullHint"> Faça
   <a id="pullMeA" target="_blank"
   href='https://help.github.com/articles/about-pull-requests/'>
   um pedido de mesclagem</a> assim que você fizer
   mudanças nela e estiver pronto para oferecer sua tradução
-  a equipe SBT. Você também pode
+  para a tradução principal. Você também pode
   <a id="toGH" href='#'>
-  ir no github</a> para sua cópia pessoal da transferência ou
+  ir no github</a> na sua cópia pessoal da tadução ou
   <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
   </div><div class="col-sm-4">
   <button id="pullMe" class="btn btn-success" style="display:none;">
   Pedido de mesclagem</button>
   <button id="syncMe" class="btn btn-default"
-  style="display:none">Sincronizar com a tradução do SBT</button>
+  style="display:none">Sincronizar com a tradução principal</button>
   </div>
   </div>
   <!-- /Forkage and pullage -->
@@ -726,7 +726,7 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-success" id='perform-commit'
     data-dismiss="modal">
-    Сохранить</button>
+    Salvar</button>
     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
   </div>
   </div>
@@ -773,8 +773,8 @@
     <h4 class="modal-title">alterações não salvas na esquerda</h4>
   </div>
   <div class='modal-body'>
-    Há mudanças não salvas na página! Você definitivamente quer descarta-las
-    de volta à lista de arquivos?
+    Há alterações não salvas na página, quer descarta-las
+    e voltar à lista de arquivos?
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-success" data-dismiss="modal"
@@ -782,7 +782,7 @@
     Salvar alterações</button>
     <button type="button" class="btn btn-warning" id='force-backtofm'
     data-dismiss="modal">
-    Descartar as alterações</button>
+    Descartar alterações</button>
     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
   </div>
   </div>
