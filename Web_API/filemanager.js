@@ -158,7 +158,7 @@ FileManager.prototype.gotoAdvancedPath = function(path, tracking)
             path: path,
             json: history.state.json,
             file_json: json,
-            }, "Interface de Tradução", "?open=" + path)
+            }, "Tradução Starbound", "?open=" + path)
       })
   }
   else{
@@ -172,7 +172,7 @@ FileManager.prototype.gotoAdvancedPath = function(path, tracking)
         path: path,
         json: json,
         file_json: false,
-        }, "Interface de Tradução", "?open=" + path)
+        }, "Tradução Starbound", "?open=" + path)
       $(fm.table).find('tbody').html('')
       fm.updateTree(json, path)
     }

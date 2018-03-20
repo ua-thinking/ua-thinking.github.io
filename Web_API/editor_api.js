@@ -73,7 +73,7 @@ const schema = {
           },
           "Por": {
             type: "string",
-            title: "Texto em portugues",
+            title: "Texto em português",
             format: "textarea",
             options:{
               required: true
