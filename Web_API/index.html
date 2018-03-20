@@ -6,12 +6,11 @@
   <meta charset="utf-8"></meta>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
   <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
-  <title>Interface de Tradução</title>
+  <title>Tradução Starbound</title>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
-  <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
   <script src="githubapi.js"></script>
   <script src="editor_api.js"></script>
   <script src="filemanager.js"></script>
@@ -48,11 +47,6 @@
     background-image: linear-gradient(#d9edf7, transparent);
   }
   </style>
-  <script>
-  ((window.gitter = {}).chat = {}).options = {
-    room: 'juniordark/translations'
-  };
-</script>
   <script type="text/javascript">
     "use strict";
     JSONEditor.defaults.options.theme = 'bootstrap3';
@@ -587,13 +581,13 @@
     onclick="$('#editor-holder div[data-schemapath=root]').children('h3')
     .find('button.json-editor-btn-collapse').click();"
     type="button">
-      [Time/С]retornar todos</button>
+      Expandir</button>
   </div>
   <button class="btn btn-default"
       onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
       type="button">Voltar ao topo</button>
   <div id='authorized' style='display: none'></div>
-  <div id='auth-failed' style='display: none'>login falhou!
+  <div id='auth-failed' style='display: none'>Login falhou!
   <div><button class="btn btn-default" type="button"
     onclick="$('#auth-failed').slideUp(); $('#auth-form').slideDown()">
     Tente novamente</button></div></div>
@@ -607,7 +601,7 @@
     <a class="btn btn-default" target="_blank"
     data-toggle="popover" data-placement="bottom" type="button"
     href="https://github.com/join" data-trigger="hover"
-    data-content="Para trabalhar com a transferência, você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta, o nome de usuário e senha que você pode usar neste site.">Registrar</a>
+    data-content="Para trabalhar com a trandução, você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta, o nome de usuário e senha que você pode usar neste site.">Registrar</a>
   </form>
   </nav>
   </aside>
@@ -638,7 +632,7 @@
   <div class="alert alert-danger fade in" id='loginRequiredAlert'
   style='display:none;'>
   <a href='javascript:$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
-  <strong>Erro!</strong> Você deve estar logado para salvar as alterações..
+  <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
   </div>
   <!-- /Alerts-->
   </section>
@@ -656,7 +650,7 @@
   principal. Se o pedido for aprovado, você terá
   a oportunidade de se juntar à equipe de tradutores. Você também pode
   continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
-  enviando pedidos para fundir sua versão da tradução com uma tradução
+  enviando pedidos para fundir sua versão da tradução com a tradução
   principal.</p>
   <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
   cópia pessoal!</button>
@@ -672,7 +666,7 @@
   mudanças nela e estiver pronto para oferecer sua tradução
   para a tradução principal. Você também pode
   <a id="toGH" href='#'>
-  ir no github</a> na sua cópia pessoal da tadução ou
+  ir no github</a> na sua cópia pessoal da tradução ou
   <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
   </div><div class="col-sm-4">
   <button id="pullMe" class="btn btn-success" style="display:none;">
@@ -770,7 +764,7 @@
   <div class='modal-content'>
   <div class='modal-header'>
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">alterações não salvas na esquerda</h4>
+    <h4 class="modal-title">Há alterações não salvas</h4>
   </div>
   <div class='modal-body'>
     Há alterações não salvas na página, quer descarta-las
