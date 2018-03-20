@@ -4,12 +4,12 @@
   <meta content="text/html; charset=UTF-8"></meta>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta charset="utf-8"></meta>
-  <link href="//cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
-  <link href="//cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
+  <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
   <title>Tradução Starbound</title>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
-  <script src="//cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
   <script src="githubapi.js"></script>
   <script src="editor_api.js"></script>
@@ -57,23 +57,29 @@
     JSONEditor.defaults.options.disable_properties = true;
     JSONEditor.defaults.options.disable_edit_json = true;
     JSONEditor.defaults.options.object_layout = 'grid';
+
     function backtofm(editor)
     {
-      var newdata = JSON.stringify(editor.get_json(), null, 2)
-      var olddata = Base64.decode(editor.filedata.content)
-      if (editor.touched)
-        if (newdata != olddata)
-        {
-          $('#unsavedMessage').modal()
-          return
+      if (typeof editor !== 'undefined')
+      {
+        if (editor.touched){
+          let newdata = JSON.stringify(editor.get_json(), null, 2)
+          let olddata = Base64.decode(editor.filedata.content)
+          if (newdata != olddata)
+          {
+            $('#unsavedMessage').modal()
+            return
+          }
         }
+        editor.reset()
+      }
       $("#editor-holder").slideUp()
       $("#editor-navigation").slideUp()
       $("#editor-navbar").slideUp()
       $("#fm-navbar").slideDown()
       $("#file-browser").slideDown()
-      editor.reset()
     }
+
     function get_call_arguments()
     {
       var params = location.search.slice(1).split('&')
@@ -81,10 +87,11 @@
       $.each(params, function(i, d)
         {
           let r = d.split('=')
-          pairs[r[0]] = r[1]
+          pairs[r[0]] = decodeURIComponent(r[1])
         })
       return pairs
     }
+
     function unlogin(){
       document.getElementById('authorized').style.display = ''
       var date = new Date();
@@ -93,19 +100,20 @@
       document.cookie = "sbtghuser=;expires=" + date.toUTCString() +
         ";domain=" + document.domain
     }
+
     function show_userdata(authdata, udata)
     {
       var authinfo = document.getElementById('authorized')
       authinfo.style.display = ''
-      authinfo.innerHTML = "Informações de login: "
+      authinfo.innerHTML = "Logado como:"
       var link = document.createElement('a')
       link.setAttribute('href', 'https://github.com/' + authdata.uname)
       link.innerHTML = udata.login
       var idiv = document.createElement('div')
       idiv.style.width='inherit'
-      var img = document.createElement(null)
-      img.setAttribute('src', null)
-      //img.className = 'img-responsive img-rounded'
+      var img = document.createElement('img')
+      img.setAttribute('src', udata.avatar_url)
+      img.className = 'img-responsive img-rounded'
       var ebutdiv = document.createElement('div')
       var ldiv = document.createElement('div')
       var exitbutton = document.createElement('button')
@@ -126,19 +134,20 @@
       $('#commitButton').attr('data-target', '#commitMessage')
       $('#commitButton').attr('data-toggle', 'modal')
     }
+
     function getCookie(name) {
       var matches = document.cookie.match(new RegExp(
         "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
       ));
       return matches ? decodeURIComponent(matches[1]) : "";
     }
+
     function subscribe_notifications(account) {
       let thepopover = {
         content: "Você tem notificações não lidas no github. <a target='_blank' id='readntf' href='https://github.com/notifications'>Ler...</a>",
         html: true,
         trigger: "none",
         placement: "bottom"}
-      let bounded = false
       let markasread = function() {
         account.request('notifications', 'PUT', JSON.stringify({}))
       }
@@ -149,10 +158,8 @@
       let on_notification = function(a) {
         if (a.length > 0) {
           $('#fm-navbar').popover("show")
-          if (!bounded){
-            $('#readntf').click(markafterdelay)
-            bounded = true
-          }
+          $('#readntf').unbind('click.markasread')
+          $('#readntf').bind('click.markasread', markafterdelay)
         }
         else {
           $('#fm-navbar').popover("hide")
@@ -167,6 +174,7 @@
         notifier()
       })
     }
+
     function login(account, data)
     {
       unlogin()
@@ -190,6 +198,25 @@
                 theWorker.justSend('getstatus', {id: 'global-progress', path: "translations/"})
               })
               $('#pullRequired').slideDown()
+              $('#resetFork').click(function() {
+                if (confirm("Tem certeza de que deseja excluir todos os seus dados?"+
+                  " Após esta ação você iniciará a transferência do mesmo local," +
+                  " onde a equipe parou no momento no SBT."))
+                account.rawRequest(account.get_repo_suffix(), "DELETE")
+                  .then(function(){
+                    alert("Todos os seus dados foram excluídos com sucesso! " +
+                      "A página será recarregada.")
+                      location.reload(true)
+                    }).fail(function(){alert("Não foi possível remover o seu " +
+                      "repositório! Tente fazêr manualmente com" +
+                      " a página de configurações do repositório em github.com" +
+                      ", para a qual você será redirecionada.")
+                      let w = window.open('https://github.com/' +
+                        account.authdata.uname + '/' + account.repo +
+                        '/settings')
+                      w.focus()
+                    })
+              })
               $('#toGH').click(function() {
                 let w = window.open('https://github.com/' +
                   account.authdata.uname + '/' + account.repo +
@@ -201,7 +228,7 @@
                 {return}
                 console.log(data)
                 $('#pullHint').slideDown()
-                let text = "Fork copy."
+                let text = "Você trabalha com uma cópia pessoal da tradução. No momento,"
                 let prefix = ""
                 if (data.ahead_by > 0)
                 {
@@ -211,7 +238,7 @@
                     w.focus()
                   }
                   $('#pullMe').click(openPR)
-                  text += "Contribuição：" +
+                  text += " o número de alterações que você fez desde o último pedido de mesclagem: " +
                     data.ahead_by + ";"
                   prefix = " а"
                 }
@@ -220,36 +247,36 @@
                   let sync_cb = function(){
                     let m = account.mergeFrom(data.base_commit.sha)
                     m.then(function(a){
-                      alert("Sincronização bem sucedida!")
+                      alert("Sincronização bem sucedida. A página será atualizada quando esta janela for fechada.")
                       window.location.reload()
                     }, function(a){
                       console.log(a)
-                      alert("Erro!")
+                      alert("Você não pode sincronizar com o repositório de conversão principal. Pode haver conflitos. Tente resolvê-los manualmente ou entre em contato com a equipe do SBT para obter ajuda.")
                     })
                   }
                   $('#syncMe').slideDown()
                   $('#syncMe').click(sync_cb)
-                  text += prefix + "Mudanças：" + data.behind_by + ";"
+                  text += prefix + " número de alterações feitas pelo comando SBT desde a última sincronização: " + data.behind_by + ";"
                   if (data.behind_by > 20)
                   {
-                    text += "Lembre-se, quanto maior a diferença entre sua cópia pessoal e a tradução principal, mais provável será o conflito surgir quando você fundir!"
+                    text += " lembre-se, quanto maior a diferença entre sua cópia pessoal e a tradução principal, mais provável será o conflito surgir quando você fundir!"
                   }
                 }
                 text += " <a href='" + data.html_url +
-                  "' target='_blank'>Detalhes...</a>"
+                  "' target='_blank'>Подробнее...</a>"
                 $('#pullText').html(text)
               })
             }
             let no_fork = function(a){
-              console.log("O usuário não tem um fork")
+              console.log("User has no fork")
               let forker = function()
               {
                 let fork_succeed = function(a) {
-                  alert("Criou uma cópia!")
+                  alert("Foi criada uma cópia pessoal da tradução! Você será redirecionado para ela depois de fechar esta janela.")
                   window.location.reload()
                 }
                 let fork_failed = function(a) {
-                  alert("Falha ao criar uma cópia pessoal!" +
+                  alert("Creating a personal copy failed! " +
                     a.response + ", " + a.responseText)
                   console.log(a)
                 }
@@ -259,7 +286,7 @@
               $('#forkMeA').click(forker)
               $('#forkRequired').slideDown()
             }
-            console.log("Não é um membro")
+            console.log("Not a member")
             account.ifHasFork().then(has_fork, no_fork)
             console.log(a)
           })
@@ -268,6 +295,7 @@
       $('#auth-form').slideUp()
       return account
     }
+
     function get_authdata()
     {
       var uname = getCookie('sbtghuser')
@@ -276,6 +304,7 @@
       var upass = getCookie('sbtghsword')
       return {uname : uname, upass: upass}
     }
+
     function resolveConflict(minefile, otherfile)
     {
       if (minefile.length !== otherfile.length)
@@ -297,14 +326,15 @@
         lastpromise = Promise.resolve(lastpromise).then(makeResolver(i))
       return lastpromise
     }
+
     function autoSolve(mine, other)
     {
       return new Promise(function(ok, fail)
       {
-        if (mine.Comment !== other.Comment) fail("Falha!")
+        if (mine.Comment !== other.Comment) fail("seção mudou")
         else if (JSON.stringify(mine.Files) !== JSON.stringify(other.Files))
-          fail("Erro, o banco de dados foi atualizado!")
-        else if (mine.Texts.Eng !== other.Texts.Eng) fail("Erro, o original mudou!")
+          fail("o banco de dados foi atualizado")
+        else if (mine.Texts.Eng !== other.Texts.Eng) fail("O texto em inglês mudou")
         else
         {
           let result = JSON.parse(JSON.stringify(other))
@@ -314,8 +344,10 @@
           if (mine.Texts.Por)
           {
             if ($.inArray(mine.Texts.Por, result.DeniedAlternatives) !== -1)
-              alert("Texto atual"+mine.Texts.Por+"Conflito"+
-                "Ignorar!")
+              alert("Seu texto '"+mine.Texts.Por+"' está na lista de opções descartadas e"+
+                " será ignorado. " +
+                "Remova-o da lista antes de salvá-lo e insira-o novamente,"+
+                " se já não for considerado descartado. ")
             else if ((! result.Texts.Por) || result.Texts.Por.length == 0)
               result.Texts.Por = mine.Texts.Por
             else if (result.Texts.Por !== mine.Texts.Por)
@@ -336,6 +368,7 @@
         }
       })
     }
+
     function popupConflict(mine, other)
     {
       return new Promise(function(ok, fail){
@@ -360,6 +393,7 @@
         $('#preferother').on('click', selectGen(other))
       })
     }
+
     function commit(account, editor)
     {
       let noconflict = account.getJSON(editor.filedata.url.slice(api_prefix.length))
@@ -381,9 +415,9 @@
       let content = JSON.stringify(newjson, null, 2)
       if (Base64.decode(editor.filedata.content) == content)
       {
-        alert("Não irá fazer alterações"+
-          "Informação de depuração: " + editor.touched +
-          "" + (Base64.decode(editor.filedata.content) == content));
+        alert("Você está tentando salvar a tradução, mas nada mudou nela!\n"+
+          "Informações adicionais\nTocado: " + editor.touched +
+          "\nIdentidade:" + (Base64.decode(editor.filedata.content) == content));
         return
       }
       if (!account.authdata.uname) {return}
@@ -416,10 +450,10 @@
         console.log(d)
         console.log(status)
         console.log(errorThrown)
-        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Tente novamente " +
-          " Ocorreu um erro ao tentar salvar o arquivo" +
-          (errorThrown ? errorThrown: "Erro desconhecido" ) + " Status: " +
-          (status ? status: "Desconhecido" ) + "Informações adicionais:\n" +
+        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Na tentativa " +
+          "houve um erro ao salvar as alterações: " +
+          (errorThrown ? errorThrown: "erro desconhecido" ) + " status: " +
+          (status ? status: "desconhecido" ) + ". Informações adicionais:\n" +
           JSON.stringify({ajax:d, self:t}, null, 2)
         $('#commitFailed').slideDown().delay(10000).slideUp()
       }
@@ -437,7 +471,7 @@
         let obj = editor.get_json()
         resolveConflict(obj, upd_json).then(finish).catch(function(reason){
           alert('Os arquivos não podem ser combinados porque '+ reason +
-            'as alterações serão descartadas')
+            '. as alterações serão descartadas.')
           finish(upd_json)
         })
       })
@@ -447,6 +481,7 @@
         return theWorker.send("updatetranslated",
           {value: translated, path: editor.filedata.path})
       })
+
       Promise.resolve(translation_updated).then(function(data)
       {
         if (data.needed)
@@ -458,12 +493,13 @@
         result.then(on_success).catch(on_fail)
       })
     }
+
     function statusUpdateHandler(data)
     {
       var obj = $('#' + data.id)
       obj.width(data.val + '%')
       obj.attr('aria-valuenow', data.val)
-      obj.html(Math.floor(data.val) + '%')
+      obj.html(Math.floor(data.val) + '% Traduzido')
       obj.removeClass()
       obj.addClass('progress-bar')
       if (data.val < 50)
@@ -484,7 +520,7 @@
      <div class="progress">
         <div class="progress-bar" role="progressbar" id='global-progress'
         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
-          <span>0% Traduzido</span>
+          <span>0% traduzido</span>
         </div>
       </div>
     </div>
@@ -497,8 +533,8 @@
             aria-haspopup="true" aria-expanded="false">
           <span class='caret'></span></button>
           <ul id='search-vars' class='dropdown-menu'>
-            <li id='searchcontent'><a href='javascript:void(0);'>Pesquisa de conteúdo</a></li>
-            <li id='searchfilename'><a href='javascript:void(0);'>Pesquisa de arquivos</a></li>
+            <li id='searchcontent'><a href='javascript:void(0);'>Pesquisar o conteúdo de um arquivo</a></li>
+            <li id='searchfilename'><a href='javascript:void(0);'>Procurar por nome de arquivo ou recurso</a></li>
           </ul>
         </span>
         <input type="text" id='searchstring' class="form-control" placeholder="">
@@ -540,16 +576,18 @@
   <div id="editor-navigation"  style="display: none">
     <button class="btn btn-default" onclick='$("#loginRequiredAlert").slideDown()'
     type="button" id='commitButton'>Salvar</button>
-	<!--disabled="disabled" title="提交功能已禁用！"-->
     <button class="btn btn-default" id='backtofm' type="button">Voltar</button>
     <button class="btn btn-default"
     onclick="$('#editor-holder div[data-schemapath=root]').children('h3')
     .find('button.json-editor-btn-collapse').click();"
     type="button">
-      Expandir tudo</button>
+      Expandir</button>
   </div>
+  <button class="btn btn-default"
+      onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
+      type="button">Voltar ao topo</button>
   <div id='authorized' style='display: none'></div>
-  <div id='auth-failed' style='display: none'>Login falhou
+  <div id='auth-failed' style='display: none'>Login falhou!
   <div><button class="btn btn-default" type="button"
     onclick="$('#auth-failed').slideUp(); $('#auth-form').slideDown()">
     Tente novamente</button></div></div>
@@ -563,7 +601,7 @@
     <a class="btn btn-default" target="_blank"
     data-toggle="popover" data-placement="bottom" type="button"
     href="https://github.com/join" data-trigger="hover"
-    data-content="Inscreva-se no GITHUB!">Registre-se</a>
+    data-content="Para trabalhar com a trandução, você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta, o nome de usuário e senha que você pode usar neste site.">Registrar</a>
   </form>
   </nav>
   </aside>
@@ -574,7 +612,7 @@
   <div class="alert alert-success fade in" id='commitSuccess'
   style='display:none;'>
   <a href='javascript:$("#commitSuccess").slideUp()' class="close">&times;</a>
-  <strong>Sucesso!</strong> A alteração foi enviada e salva com sucesso!
+  <strong>Sucesso!</strong> Suas alterações foram salvas com sucesso.!
   </div>
   <div class="alert alert-info" id='commitWait'
   style='display:none'>
@@ -594,10 +632,52 @@
   <div class="alert alert-danger fade in" id='loginRequiredAlert'
   style='display:none;'>
   <a href='javascript:$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
-  <strong>Erro!</strong> Você deve estar logado para salvar as alterações!
+  <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
   </div>
   <!-- /Alerts-->
   </section>
+
+  <section>
+  <!-- Forkage and pullage -->
+  <div class="col-sm-12 alert alert-info" id="forkRequired"
+  style="display:none;z-index:1">
+  <p class="col-sm-8">Parece que você não é membro da equipe principal
+  dos tradutores.
+  Se você ainda quer traduzir, <a id="forkMeA">faça uma
+  cópia pessoal da</a>
+  tradução, traduza o tanto quanto você quiser, em seguida,
+  faça um pedido para mesclar sua cópia pessoal com a tradução
+  principal. Se o pedido for aprovado, você terá
+  a oportunidade de se juntar à equipe de tradutores. Você também pode
+  continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
+  enviando pedidos para fundir sua versão da tradução com a tradução
+  principal.</p>
+  <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
+  cópia pessoal!</button>
+  </div>
+  <div class="col-sm-12 alert alert-info" id="pullRequired"
+  style="display:none;z-index:1">
+  <div class="col-sm-8">
+  <p id="pullText">Agora você trabalha com sua cópia pessoal
+  da tradução.</p><p>Eu recomendo que você leia <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">a descrição</a>, se você ainda não o fez. <p id="pullHint"> Faça
+  <a id="pullMeA" target="_blank"
+  href='https://help.github.com/articles/about-pull-requests/'>
+  um pedido de mesclagem</a> assim que você fizer
+  mudanças nela e estiver pronto para oferecer sua tradução
+  para a tradução principal. Você também pode
+  <a id="toGH" href='#'>
+  ir no github</a> na sua cópia pessoal da tradução ou
+  <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
+  </div><div class="col-sm-4">
+  <button id="pullMe" class="btn btn-success" style="display:none;">
+  Pedido de mesclagem</button>
+  <button id="syncMe" class="btn btn-default"
+  style="display:none">Sincronizar com a tradução principal</button>
+  </div>
+  </div>
+  <!-- /Forkage and pullage -->
+  </section>
+
   <section>
   <div id="file-browser">
   </div>
@@ -621,7 +701,7 @@
     <div id='searchresult-holder'></div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
   </div></div></div></div><!--/Search_results modal-->
   <!--Commit modal -->
   <div id='commitMessage' class='modal fade' role='dialog'>
@@ -629,7 +709,7 @@
   <div class='modal-content'>
   <div class='modal-header'>
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">Enviar alterações</h4>
+    <h4 class="modal-title">Comentário sobre mudanças</h4>
   </div>
   <div class='modal-body'>
     Digite um comentário com uma breve descrição das mudanças feitas, bem como, possivelmente,
@@ -640,7 +720,7 @@
   <div class="modal-footer">
     <button type="button" class="btn btn-success" id='perform-commit'
     data-dismiss="modal">
-    Enviar</button>
+    Salvar</button>
     <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
   </div>
   </div>
@@ -652,7 +732,7 @@
   <div class='modal-dialog modal-lg'>
   <div class='modal-content'>
   <div class='modal-header'>
-    <h4 class="modal-title">Traduções traduzidas!</h4>
+    <h4 class="modal-title">O arquivo foi alterado por outro tradutor!</h4>
   </div>
   <div class='modal-body'>
     <div id='waiterconflict'><p>O arquivo que você está tentando salvar foi alterado por
@@ -663,8 +743,8 @@
       aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style='width: 100%'>
     </div></div></div>
     <div id="particularconflict" style="display: none" class="row">
-    <div class="col-sm-6"><h4>Sua tradução: </h4><p id="mineconflict"></p></div>
-    <div class="col-sm-6"><h4>Tradução de outras pessoas: </h4>
+    <div class="col-sm-6"><h4>Minha tradução:</h4><p id="mineconflict"></p></div>
+    <div class="col-sm-6"><h4>Tradução de outro tradutor:</h4>
     <p id="otherconflict"></p></div>
     </div>
   </div>
@@ -687,7 +767,8 @@
     <h4 class="modal-title">Há alterações não salvas</h4>
   </div>
   <div class='modal-body'>
-    Há alterações não salvas, descarta-las?
+    Há alterações não salvas na página, quer descarta-las
+    e voltar à lista de arquivos?
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-success" data-dismiss="modal"
@@ -695,8 +776,8 @@
     Salvar alterações</button>
     <button type="button" class="btn btn-warning" id='force-backtofm'
     data-dismiss="modal">
-    Cancelar alterações</button>
-    <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+    Descartar alterações</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
   </div>
   </div>
   </div>
@@ -710,9 +791,10 @@
     $(document).ready(function()
     {
       $('[data-toggle="popover"]').popover()
-      var authdata = get_authdata()
-      var account = new GHAccount(authdata, "JuniorDark",
+      let authdata = get_authdata()
+      let account = new GHAccount(authdata, "JuniorDark",
         "Starbound", 'master')
+      let callargs = get_call_arguments()
       if (authdata == false)
       {
         document.getElementById('auth-form').style.display = ''
@@ -735,12 +817,19 @@
         $("#fm-navbar").slideUp()
         $("#editor-navigation").slideDown()
         editor.filedata = json
-        editor.open_json(Base64.decode(json.content))
+        editor.open_json(Base64.decode(json.content), callargs.goto)
       }
-      var filemanager = new FileManager($("#file-browser")[0],
+
+      let filemanager = new FileManager($("#file-browser")[0],
         $("#fm-history")[0], account, on_file)
+      let fmreturn = function(){backtofm(editor)}
+      $(window).bind('popstate', function(e){
+        let ev = e.originalEvent.state
+        if(ev && ev.json && ! ev.file_json)
+          fmreturn()
+      })
       $('#perform-commit').on('click', function(){commit(account, editor)})
-      $('#backtofm').on('click', function(){backtofm(editor);})
+      $('#backtofm').on('click', fmreturn)
       $('#force-backtofm').on('click', function()
       {
         editor.touched = false;
@@ -775,10 +864,12 @@
             return o;
           }, {}))
       })
+
       let listHolder = $('#searchresult-holder')
       let resultsList = new FileManager(listHolder[0], null, null,
         function(p){
-          let newwin = window.open(document.location + '?open='+escape(p))
+          let pattern = $('#searchstring').val()
+          let newwin = window.open('?open='+escape(p)+'&goto='+encodeURIComponent(pattern))
           if (newwin)
             newwin.focus()
           else
@@ -795,10 +886,10 @@
           type: "file"
         }], "")
       })
+
       progressrefreshed.then(function (){
-        var callargs = get_call_arguments()
         if (callargs.open)
-          filemanager.gotoPath(unescape(callargs.open))
+          filemanager.gotoAdvancedPath(unescape(callargs.open), "none")
         else
           filemanager.gotoHome()
         theWorker.justSend("getstatus",

@@ -31,7 +31,7 @@ GHAccount.prototype.rawRequest = function(url, type, data, onprogress)
   {
     let ajax = new XMLHttpRequest()
     ajax.open(type, api_prefix + url, true)
-    ajax.onerror = function(stat) {fail(ajax, stat, "Erro de conexão!")}
+    ajax.onerror = function(stat) {fail(ajax, stat, "erro de conexão")}
     if (typeof onprogress == "function")
       ajax.onprogress = function(pe)
       {
@@ -54,7 +54,8 @@ GHAccount.prototype.rawRequest = function(url, type, data, onprogress)
 GHAccount.prototype.request = function(url, type, data, onprogress)
 {
   let result = this.rawRequest(url, type, data, onprogress)
-  return result.then(function(answer){return JSON.parse(answer)})
+  return result.then(function(answer)
+    {if (answer != "") return JSON.parse(answer)})
 }
 
 GHAccount.prototype.check_authdata = function (authdata, on_success, on_fail)
@@ -62,7 +63,11 @@ GHAccount.prototype.check_authdata = function (authdata, on_success, on_fail)
   var acc = this
   acc.authdata = authdata
   let authed = acc.request("user", "GET", {})
-  authed.then(on_success).catch(function(a)
+  authed.then(function(a)
+  {
+    acc.authdata.uname = a.login;
+    on_success(a)
+  }).catch(function(a)
   {
     acc.authdata = {}
     on_fail(a)
@@ -77,9 +82,9 @@ GHAccount.prototype.get_repo_suffix = function()
 GHAccount.prototype.ifNotAMember = function ()
 {
   let acc = this
-  let url = "orgs/" + acc.owner + "/members/" + acc.authdata.uname
+  let url = "orgs/" + "StarboundPTBR" + "/members/" + acc.authdata.uname
   return new Promise(function(ok, fail) {
-    //acc.rawRequest(url, "GET", {}).catch(ok).then(function(){})
+    acc.rawRequest(url, "GET", {}).catch(ok).then(function(){})
   })
 }
 

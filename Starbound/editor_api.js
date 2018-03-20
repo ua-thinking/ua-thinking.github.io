@@ -16,7 +16,7 @@ const schema = {
       "DeniedAlternatives":{
         type: "array",
         format: "table",
-        title: "DeniedAlternatives",
+        title: "Traduções descartadas",
         options:{
           disable_array_add: false,
           disable_array_delete: false,
@@ -30,7 +30,7 @@ const schema = {
       },
       "Files":{
         type: "object",
-        title: "Usado em: ",
+        title: "Usado em:",
         format: "table",
         options:{
           collapsed: true,
@@ -52,7 +52,7 @@ const schema = {
                 disable_array_delete: true,
               },
               type: "string",
-              title: "Json path: ",
+              title: "Caminho dentro do json",
               format: "url"
             }
           }
@@ -86,11 +86,10 @@ const schema = {
   }
 }
 
-function check_codex_length(text, after_check)
+function check_label_length(text, after_check, maxwidth, maxheight)
 {
-  let maxwidth = 40
   let width = maxwidth
-  let height = 17 - 1 // first string taken anyway
+  let height = maxheight - 1 // first string taken anyway
   let splited = text.split(/([^\t\s\n\r]+|\r?\n)/)
   for (let s in splited)
   {
@@ -122,8 +121,142 @@ function theEditor(holder, navigator)
   this.touched = false
 }
 
+let onImage = function(imgUrl){
+  let image = document.createElement('IMG')
+  image.src = imgUrl
+  image.className = 'img-rounded img-responsive'
+  return image
+}
 
-theEditor.prototype.load_part = function (start)
+function makeCarousel(name)
+{
+  let carousel = document.createElement('div')
+  carousel.id = "Carousel-" + name
+  carousel.className = "carousel slide"
+  $(carousel).attr("data-ride", "carousel")
+  let left = document.createElement('a')
+  let right = document.createElement('a')
+  $(left).add(right).addClass("carousel-control")
+  $(left).addClass("left")
+  $(right).addClass("right")
+  left.href = '#Carousel-' + name
+  right.href = '#Carousel-' + name
+  $(left).attr("data-slide", "prev")
+  $(right).attr("data-slide", "next")
+  $(left).append("<span class='glyphicon glyphicon-chevron-left'></span>")
+  $(right).append("<span class='glyphicon glyphicon-chevron-right'></span>")
+  $(carousel).append(left, right)
+  return carousel
+}
+
+function referenceLookup(subtree, path)
+{
+  let pageref = path.split('/').pop().split('.')[0]
+  let siteUrl = "http://starbounder.org"
+  let apiUrl = siteUrl + "/mediawiki/api.php?"
+  let to_replace = $(subtree).find('h3')
+  let sysAnch = document.createElement("A")
+  let container = document.createElement("DIV")
+  sysAnch.href = siteUrl + "/Data:" + pageref
+  sysAnch.target = "_blank"
+  sysAnch.innerHTML = path
+  container.appendChild(sysAnch)
+  let carousel = makeCarousel(path.replace(/[\/\.]/g, '_'))
+  let imageLink = document.createElement('A')
+  imageLink.className = 'carousel-inner'
+  imageLink.target = "_blank"
+  $(carousel).prepend(imageLink)
+  to_replace.replaceWith(container)
+  let imagesResponse = function(response){
+    let icon_needed = true
+    let pngneeded = true
+    if(response.query.allimages.length > 0)
+      container.appendChild(carousel)
+    for(let i in response.query.allimages){
+      let img = response.query.allimages[i]
+      if(icon_needed && img.name.match(/Icon\.png/)){
+        $(container).parent().parent().parent().parent().parent()
+          .siblings('h3').append("<img class=btn-group src='" + img.url + "'>")
+        icon_needed = false
+      }
+      else if(pngneeded || img.name.match(/Sample/) ||
+              ! img.name.match(/png$/)){
+        $(imageLink).append("<img class='item center-block img-responsive" +
+          " img-rounded' src='"+ img.url + "'>")
+        pngneeded = false
+      }
+    }
+    $(imageLink).children().first().addClass("active")
+  }
+  let serviceResponse = function(response){
+    let name = ""
+    if(response.error){
+      name = pageref.replace(/\s/g, "_")
+    }
+    else{
+      for (let i in response.parse.links){
+        let link = response.parse.links[i]
+        if(link.ns == 0){
+          name = encodeURIComponent(link["*"].replace(/\s/g, '_'))
+          break
+        }
+      }
+      if(name == "") return
+    }
+    imageLink.href = siteUrl + "/" + name
+    let wpurl = apiUrl + $.param({
+      action:"query",
+      format:"json",
+      aifrom:name,
+      list:"allimages",
+      aiprefix:name,
+    })
+    $.ajax(wpurl, {dataType:"jsonp"}).done(imagesResponse)
+
+  }
+  let starbounderUrl = apiUrl + $.param({
+      action: "parse",
+      format: "json",
+      prop: "links",
+      page: "Data:" + pageref,
+  })
+  $.ajax(starbounderUrl,{dataType: "jsonp"})
+    .done(serviceResponse)
+}
+
+theEditor.prototype.generate_label_checker = function(ii, maxwidth, maxheight)
+{
+  let ed = this
+  function after_check(diff)
+  {
+    $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
+      .find('#overflow-warning').remove()
+    $(ed.subeditors[ii].root_container).find('#overflow-head').remove()
+    if (diff > 0)
+    {
+      $(ed.subeditors[ii].root_container).addClass('alert-danger')
+      $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
+        .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
+        ' Лишних строк: '+ diff +'!</p>')
+      $(ed.subeditors[ii].root_container).children('h3')
+      .append('<span id="overflow-head">O texto é muito longo!</span>')
+    }
+    else
+    {
+      $(ed.subeditors[ii].root_container).removeClass('alert-danger')
+    }
+  }
+  return function(first)
+  {
+    let curval = ed.subeditors[ii].getEditor('root.Texts.Por').getValue()
+    check_label_length(curval, after_check, maxwidth, maxheight)
+    ed.touched = true
+    if (first){ ed.touched = false}
+  }
+}
+
+
+theEditor.prototype.load_part = function (start, selected)
 {
   this.subeditors = {}
   this.holder.html("")
@@ -137,17 +270,20 @@ theEditor.prototype.load_part = function (start)
     {
       this.json[i]['Texts']['Por'] = ""
     }
-    if (titletext.length > 16)
+    if (titletext.length > 20)
     {
-      titletext = titletext.slice(0, 16) + "..."
+      titletext = titletext.slice(0, 20) + "..."
     }
-    if (this.json.length-start < 2)
+    if (this.json.length-start < 3)
     {
       fixed_schema.schema.options.collapsed = false
     }
     fixed_schema.schema.title = titletext
     var subeditor = new JSONEditor(this.holder[0], fixed_schema)
     subeditor.setValue(this.json[i])
+    subeditor.root_container.id = 'element-' + i
+    if (i === selected)
+      $(subeditor.root_container).addClass('alert-warning')
     this.subeditors[i] = subeditor
     if (this.json[i]['DeniedAlternatives'] &&
       this.json[i]['DeniedAlternatives'].length > 0)
@@ -156,36 +292,7 @@ theEditor.prototype.load_part = function (start)
         .find('div[data-schemapath="root.DeniedAlternatives"]')
         .addClass('alert-success')
     }
-    function generate_codex_checker(ii)
-    {
-      function after_check(diff)
-      {
-        $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
-          .find('#overflow-warning').remove()
-        $(ed.subeditors[ii].root_container).find('#overflow-head').remove()
-        if (diff > 0)
-        {
-          $(ed.subeditors[ii].root_container).addClass('alert-danger')
-          $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
-            .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
-            ' '+ diff +'linhas extras!</p>')
-          $(ed.subeditors[ii].root_container).children('h3')
-          .append('<span id="overflow-head">O texto é muito longo!</span>')
-        }
-        else
-        {
-          $(ed.subeditors[ii].root_container).removeClass('alert-danger')
-        }
-      }
-      return function(first)
-      {
-        let curval = ed.subeditors[ii].getEditor('root.Texts.Por').getValue()
-        check_codex_length(curval, after_check)
-        ed.touched = true
-        if (first){ ed.touched = false}
-      }
-    }
-    let ccheck = generate_codex_checker(i)
+    let ccheck = ed.generate_label_checker(i, 40, 17)
     ccheck(true)
     subeditor.watch('root.Texts.Por', ccheck)
     if (this.json[i]['Texts']['Por'] === "")
@@ -205,7 +312,6 @@ theEditor.prototype.load_part = function (start)
   $(this.holder).find('div[data-schemapath^="root.Files."]').each(function(i,c){
       let prefix_len = "root.Files.".length
       let path = $(c).attr('data-schemapath').substring(prefix_len)
-      let pathhref = path.split('/').pop().split('.')[0]
       $(c).find('button').hide()
       $(c).find('[data-schemapath^="root.Files.' + path + '."]').each(function(i,p)
       {
@@ -213,8 +319,7 @@ theEditor.prototype.load_part = function (start)
         $(p).parent().append('<p>' + internal_path + '</p>')
         $(p).hide()
       })
-      $(c).find('h3').replaceWith("<a href='http://starbounder.org/Data:" +
-        pathhref + "' target='_blank'>" + path + "</a>")
+      referenceLookup(c, path)
     })
   $('table.table-bordered').css('width', '')
 }
@@ -229,13 +334,13 @@ theEditor.prototype.get_json = function ()
   return thejson
 }
 
-theEditor.prototype.json_onload = function (data)
+theEditor.prototype.json_onload = function (data, gotopattern)
 {
   this.json = []
   this.navbar.innerHTML = ""
-  var page = 1
+  let page = 1
   $('#current-filename').text(this.filedata.name)
-  var editor = this
+  let editor = this
   function get_onclick(start)
   {
     return (function(){
@@ -250,10 +355,17 @@ theEditor.prototype.json_onload = function (data)
   }
   let has_untranslated = false
   let ii = 0
+  let target_pagestart = 0
+  let target_i = -1
   let last_i = 0
   for (let i = 0 ; i < data.length; i += 1)
   {
     let texts = data[i]["Texts"]
+    if (gotopattern && (texts["Eng"].match(gotopattern) ||
+        (texts["Por"] && texts["Por"].match(gotopattern)))){
+      target_pagestart = last_i
+      target_i = i
+    }
     let translated = ("Por" in texts) && (texts["Por"].length > 0)
     has_untranslated = has_untranslated || !translated
     if (ii == editors_per_page - 1 | i == data.length - 1)
@@ -270,7 +382,6 @@ theEditor.prototype.json_onload = function (data)
       }
       navelement.appendChild(navbutton)
       this.navbar.append(navelement)
-      //this.json = this.json.concat(data.slice(last_i, i + 1))
       page += 1
       last_i = i+1
       ii = -1 //not 0 due to increment after
@@ -279,9 +390,11 @@ theEditor.prototype.json_onload = function (data)
     ii += 1
   }
   this.json = data
-  //console.log(data.length + " == " + this.json.length )
-  $('#navbarel-0').addClass('active')
-  this.load_part(0)
+  $('#navbarel-' + target_pagestart).addClass('active')
+  this.load_part(target_pagestart, target_i)
+  if (target_i >=0){
+    window.location.hash = '#element-' + target_i
+  }
 }
 
 
@@ -298,8 +411,8 @@ theEditor.prototype.reset = function ()
   this.filedata = {}
 }
 
-theEditor.prototype.open_json = function (content)
+theEditor.prototype.open_json = function (content, gotopattern)
 {
   let data = $.parseJSON(content)
-  this.json_onload(data)
+  this.json_onload(data, gotopattern)
 }
