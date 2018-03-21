@@ -437,7 +437,7 @@
           JSON.stringify(editor.get_json(), null, 2))
         $('#commitWait').slideUp()
         $('#commitMessageText')[0].value = ""
-        $('#commitSuccess').slideDown().delay(2000).slideUp()
+        $('#commitSuccess').slideDown().delay(200).slideUp()
         theWorker.justSend("getstatus", {
             path: editor.filedata.path,
             id: "file-browser-progress-" + editor.filedata.name.replace(/[\./]/g, '-')
