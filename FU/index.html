@@ -238,7 +238,7 @@
                     w.focus()
                   }
                   $('#pullMe').click(openPR)
-                  text += " o número de alterações que você fez desde o último pedido de mesclagem: " +
+                  text += " o número de alterações que você fez desde o último pedido de mesclagem (pull request): " +
                     data.ahead_by + ";"
                   prefix = " а"
                 }
@@ -437,7 +437,7 @@
           JSON.stringify(editor.get_json(), null, 2))
         $('#commitWait').slideUp()
         $('#commitMessageText')[0].value = ""
-        $('#commitSuccess').slideDown().delay(2000).slideUp()
+        $('#commitSuccess').slideDown().delay(1500).slideUp()
         theWorker.justSend("getstatus", {
             path: editor.filedata.path,
             id: "file-browser-progress-" + editor.filedata.name.replace(/[\./]/g, '-')
@@ -641,19 +641,18 @@
   <!-- Forkage and pullage -->
   <div class="col-sm-12 alert alert-info" id="forkRequired"
   style="display:none;z-index:1">
-  <p class="col-sm-8">Parece que você não é membro da equipe principal
-  dos tradutores.
+  <p class="col-sm-8">Parece que você não é um membro da equipe de tradutores.
   Se você ainda quer traduzir, <a id="forkMeA">faça uma
   cópia pessoal da</a>
   tradução, traduza o tanto quanto você quiser, em seguida,
-  faça um pedido para mesclar sua cópia pessoal com a tradução
+  faça um pedido de mesclagem (pull request) da sua cópia pessoal para a tradução
   principal. Se o pedido for aprovado, você terá
   a oportunidade de se juntar à equipe de tradutores. Você também pode
   continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
   enviando pedidos para fundir sua versão da tradução com a tradução
   principal.</p>
   <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
-  cópia pessoal!</button>
+  cópia pessoal(fork)!</button>
   </div>
   <div class="col-sm-12 alert alert-info" id="pullRequired"
   style="display:none;z-index:1">
@@ -662,7 +661,7 @@
   da tradução.</p><p>Eu recomendo que você leia <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">a descrição</a>, se você ainda não o fez. <p id="pullHint"> Faça
   <a id="pullMeA" target="_blank"
   href='https://help.github.com/articles/about-pull-requests/'>
-  um pedido de mesclagem</a> assim que você fizer
+  um pedido de mesclagem (pull request)</a> assim que você fizer
   mudanças nela e estiver pronto para oferecer sua tradução
   para a tradução principal. Você também pode
   <a id="toGH" href='#'>
@@ -670,7 +669,7 @@
   <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
   </div><div class="col-sm-4">
   <button id="pullMe" class="btn btn-success" style="display:none;">
-  Pedido de mesclagem</button>
+  Pedido de mesclagem (pull request)</button>
   <button id="syncMe" class="btn btn-default"
   style="display:none">Sincronizar com a tradução principal</button>
   </div>
