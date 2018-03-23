@@ -585,8 +585,37 @@
     .find('button.json-editor-btn-collapse').click();"
     type="button">
       Expandir</button>
-  </div>
-  <button class="btn btn-default"
+  </div>  
+<script type="text/javascript">
+// function to disable and enable buttons, receives an array with button IDs
+// from http://coursesweb.net/javascript/
+function disableEnableBtn(ids) {
+  // traverses the array with IDs
+  var nrids = ids.length;
+  for(var i=0; i<nrids; i++) {
+    // registers onclick event to each button
+    if(document.getElementById(ids[i])) {
+      document.getElementById(ids[i]).onclick = function() {
+        this.setAttribute('disabled');     // disables the button by adding the 'disabled' attribute
+        this.innerHTML = 'Salvar';        // changes the button text
+        var idbtn = this.id;       // stores the button ID
+
+        // calls a function after 2 sec. (2000 milliseconds)
+        setTimeout( function() {
+          document.getElementById(idbtn).removeAttribute('disabled');         // removes the "disabled" attribute
+          document.getElementById(idbtn).innerHTML = 'Salvar';        // changes tne button text
+        }, 70000 );
+      }
+    }
+  }
+}
+
+// array with IDs of buttons
+var btnid = ['commitButton'];
+
+disableEnableBtn(btnid);      // calls the function
+</script>
+    <button class="btn btn-default"
       onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
       type="button">Voltar ao topo</button>
   <div id='authorized' style='display: none'></div>
