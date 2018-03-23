@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta content="text/html; charset=UTF-8"></meta>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8"></meta>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
+  <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
+  <title>Tradução RPGGrowth</title>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
+  <script src="githubapi.js"></script>
+  <script src="editor_api.js"></script>
+  <script src="filemanager.js"></script>
+  <script src="worker_manager.js"></script>
+  <style>
+  #sidebar.affix{
+    width: 12%;
+    top: 90px;
+  }
+  #topnav.affix {
+    top: 0;
+    width: 100%;
+    height: 70px;
+  }
+  .maxcontent {
+    width: -moz-max-content;
+    width: -webkit-max-content;
+    width: max-content;
+  }
+  .affix + .container-fluid {
+    padding-top: 70px;
+  }
+  .navbar{
+    z-index: 2;
+    height: 70px;
+  }
+  .gloshref{
+    color: red
+  }
+  .gloshref:visited{
+    color: green
+  }
+  .pagination > .untranslated > a{
+    background-image: linear-gradient(#d9edf7, transparent);
+  }
+  </style>
+  <script type="text/javascript">
+    "use strict";
+    JSONEditor.defaults.options.theme = 'bootstrap3';
+    JSONEditor.defaults.options.iconlib = "bootstrap3";
+    JSONEditor.defaults.options.disable_array_delete_all_rows = true;
+    JSONEditor.defaults.options.disable_array_delete_last_row = true;
+    JSONEditor.defaults.options.disable_array_reorder = true;
+    JSONEditor.defaults.options.disable_properties = true;
+    JSONEditor.defaults.options.disable_edit_json = true;
+    JSONEditor.defaults.options.object_layout = 'grid';
+
+    function backtofm(editor)
+    {
+      if (typeof editor !== 'undefined')
+      {
+        if (editor.touched){
+          let newdata = JSON.stringify(editor.get_json(), null, 2)
+          let olddata = Base64.decode(editor.filedata.content)
+          if (newdata != olddata)
+          {
+            $('#unsavedMessage').modal()
+            return
+          }
+        }
+        editor.reset()
+      }
+      $("#editor-holder").slideUp()
+      $("#editor-navigation").slideUp()
+      $("#editor-navbar").slideUp()
+      $("#fm-navbar").slideDown()
+      $("#file-browser").slideDown()
+    }
+
+    function get_call_arguments()
+    {
+      var params = location.search.slice(1).split('&')
+      var pairs = {}
+      $.each(params, function(i, d)
+        {
+          let r = d.split('=')
+          pairs[r[0]] = decodeURIComponent(r[1])
+        })
+      return pairs
+    }
+
+    function unlogin(){
+      document.getElementById('authorized').style.display = ''
+      var date = new Date();
+      document.cookie = "sbtghsword=;expires=" + date.toUTCString() +
+        ";domain=" + document.domain
+      document.cookie = "sbtghuser=;expires=" + date.toUTCString() +
+        ";domain=" + document.domain
+    }
+
+    function show_userdata(authdata, udata)
+    {
+      var authinfo = document.getElementById('authorized')
+      authinfo.style.display = ''
+      authinfo.innerHTML = "Logado como:"
+      var link = document.createElement('a')
+      link.setAttribute('href', 'https://github.com/' + authdata.uname)
+      link.innerHTML = udata.login
+      var idiv = document.createElement('div')
+      idiv.style.width='inherit'
+      var img = document.createElement('img')
+      img.setAttribute('src', udata.avatar_url)
+      img.className = 'img-responsive img-rounded'
+      var ebutdiv = document.createElement('div')
+      var ldiv = document.createElement('div')
+      var exitbutton = document.createElement('button')
+      exitbutton.className = "btn btn-default"
+      exitbutton.setAttribute('type', 'button')
+      exitbutton.innerHTML = "Sair"
+      exitbutton.title = "Sair"
+      exitbutton.onclick = function() {unlogin(); location.reload()}
+      idiv.appendChild(img)
+      ldiv.appendChild(link)
+      ebutdiv.appendChild(exitbutton)
+      authinfo.appendChild(ldiv)
+      authinfo.appendChild(idiv)
+      authinfo.appendChild(ebutdiv)
+      $('#loginRequiredAlert').slideUp()
+      $('#commitButton').addClass('btn-success')
+      $('#commitButton')[0].onclick = null
+      $('#commitButton').attr('data-target', '#commitMessage')
+      $('#commitButton').attr('data-toggle', 'modal')
+    }
+
+    function getCookie(name) {
+      var matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+      ));
+      return matches ? decodeURIComponent(matches[1]) : "";
+    }
+
+    function subscribe_notifications(account) {
+      let thepopover = {
+        content: "Você tem notificações não lidas no github. <a target='_blank' id='readntf' href='https://github.com/notifications'>Ler...</a>",
+        html: true,
+        trigger: "none",
+        placement: "bottom"}
+      let markasread = function() {
+        account.request('notifications', 'PUT', JSON.stringify({}))
+      }
+      let markafterdelay = function () {
+        setTimeout(markasread, 10000)
+        $('#fm-navbar').popover('hide')
+      }
+      let on_notification = function(a) {
+        if (a.length > 0) {
+          $('#fm-navbar').popover("show")
+          $('#readntf').unbind('click.markasread')
+          $('#readntf').bind('click.markasread', markafterdelay)
+        }
+        else {
+          $('#fm-navbar').popover("hide")
+        }
+      }
+      let notifier = function() {
+        account.request('notifications', 'GET', "").then(on_notification)
+      }
+      $(document).ready(function(){
+        $('#fm-navbar').popover(thepopover)
+        setInterval(notifier, 60000)
+        notifier()
+      })
+    }
+
+    function login(account, data)
+    {
+      unlogin()
+      account.check_authdata(data, function(user_data)
+        {
+          data.email = user_data.email
+          subscribe_notifications(account)
+          var date = new Date()
+          date.setMonth(date.getMonth() + 1)
+          document.cookie = "sbtghuser=" + data.uname +
+            ";domain=" + document.domain + ';expires='+ date.toUTCString()
+          document.cookie = "sbtghsword=" + data.upass +
+            ";domain=" + document.domain + ';expires='+ date.toUTCString()
+          show_userdata(data, user_data)
+          account.ifNotAMember().then(function (a) {
+            let has_fork = function(a) {
+              console.log("has fork")
+              account.switchToFork()
+              theWorker.refresh_account(account)
+              theWorker.send('refreshprogress').then(function(){
+                theWorker.justSend('getstatus', {id: 'global-progress', path: "translations/"})
+              })
+              $('#pullRequired').slideDown()
+              $('#resetFork').click(function() {
+                if (confirm("Tem certeza de que deseja excluir todos os seus dados?"+
+                  " Após esta ação você iniciará a tradução do mesmo local," +
+                  " onde a equipe parou no momento na tradução principal."))
+                account.rawRequest(account.get_repo_suffix(), "DELETE")
+                  .then(function(){
+                    alert("Todos os seus dados foram excluídos com sucesso! " +
+                      "A página será recarregada.")
+                      location.reload(true)
+                    }).fail(function(){alert("Não foi possível remover o seu " +
+                      "repositório! Tente fazêr manualmente" +
+                      " na página de configurações do repositório em github.com" +
+                      ", para a qual você será redirecionada.")
+                      let w = window.open('https://github.com/' +
+                        account.authdata.uname + '/' + account.repo +
+                        '/settings')
+                      w.focus()
+                    })
+              })
+              $('#toGH').click(function() {
+                let w = window.open('https://github.com/' +
+                  account.authdata.uname + '/' + account.repo +
+                  '/tree/' + account.branch)
+                w.focus()
+              })
+              account.compareToOwner().then(function(data){
+                if (data.ahead_by == 0 && data.behind_by == 0)
+                {return}
+                console.log(data)
+                $('#pullHint').slideDown()
+                let text = "Você trabalha com uma cópia pessoal da tradução. No momento,"
+                let prefix = ""
+                if (data.ahead_by > 0)
+                {
+                  $('#pullMe').slideDown()
+                  let openPR = function(){
+                    let w = window.open(data.html_url + '?expand=1')
+                    w.focus()
+                  }
+                  $('#pullMe').click(openPR)
+                  text += " número de alterações que você fez desde o último pedido de mesclagem (pull request): " +
+                    data.ahead_by + ";"
+                  prefix = " а"
+                }
+                if (data.behind_by > 0)
+                {
+                  let sync_cb = function(){
+                    let m = account.mergeFrom(data.base_commit.sha)
+                    m.then(function(a){
+                      alert("Sincronização bem sucedida. A página será atualizada quando esta janela for fechada.")
+                      window.location.reload()
+                    }, function(a){
+                      console.log(a)
+                      alert("Você não pode sincronizar com o repositório de conversão principal. Pode haver conflitos. Tente resolvê-los manualmente ou entre em contato com a equipe de tradução para obter ajuda.")
+                    })
+                  }
+                  $('#syncMe').slideDown()
+                  $('#syncMe').click(sync_cb)
+                  text += prefix + " número de alterações feitas pela equipe de tradução desde a última sincronização: " + data.behind_by + ";"
+                  if (data.behind_by > 20)
+                  {
+                    text += " lembre-se, quanto maior a diferença entre sua cópia pessoal e a tradução principal, mais provável será o conflito quando você fundir!"
+                  }
+                }
+                text += " <a href='" + data.html_url +
+                  "' target='_blank'>Saiba mais...</a>"
+                $('#pullText').html(text)
+              })
+            }
+            let no_fork = function(a){
+              console.log("O usuário não tem fork")
+              let forker = function()
+              {
+                let fork_succeed = function(a) {
+                  alert("Foi criada uma cópia pessoal da tradução! Você será redirecionado para ela depois de fechar esta janela.")
+                  window.location.reload()
+                }
+                let fork_failed = function(a) {
+                  alert("Falha ao criar uma cópia pessoal! " +
+                    a.response + ", " + a.responseText)
+                  console.log(a)
+                }
+                account.fork().then(fork_succeed, fork_failed)
+              }
+              $('#forkMe').click(forker)
+              $('#forkMeA').click(forker)
+              $('#forkRequired').slideDown()
+            }
+            console.log("Não é um membro")
+            account.ifHasFork().then(has_fork, no_fork)
+            console.log(a)
+          })
+        },
+        function(){$('#auth-failed').slideDown()})
+      $('#auth-form').slideUp()
+      return account
+    }
+
+    function get_authdata()
+    {
+      var uname = getCookie('sbtghuser')
+      if (uname.length == 0)
+      { return false }
+      var upass = getCookie('sbtghsword')
+      return {uname : uname, upass: upass}
+    }
+
+    function resolveConflict(minefile, otherfile)
+    {
+      if (minefile.length !== otherfile.length)
+        return false
+      let resultfile = []
+      let lastpromise = {}
+      function makeResolver(ii)
+      {
+        return function()
+        {
+          return autoSolve(minefile[ii], otherfile[ii]).then(function(r)
+          {
+            resultfile.push(r)
+            return resultfile
+          })
+        }
+      }
+      for (let i = 0; i < minefile.length; i++)
+        lastpromise = Promise.resolve(lastpromise).then(makeResolver(i))
+      return lastpromise
+    }
+
+    function autoSolve(mine, other)
+    {
+      return new Promise(function(ok, fail)
+      {
+        if (mine.Comment !== other.Comment) fail("seção mudou")
+        else if (JSON.stringify(mine.Files) !== JSON.stringify(other.Files))
+          fail("o banco de dados foi atualizado")
+        else if (mine.Texts.Eng !== other.Texts.Eng) fail("O texto em inglês mudou")
+        else
+        {
+          let result = JSON.parse(JSON.stringify(other))
+          for (let i in mine.DeniedAlternatives)
+            if ($.inArray(mine.DeniedAlternatives[i], result.DeniedAlternatives) == -1)
+              result.DeniedAlternatives.push(mine.DeniedAlternatives[i])
+          if (mine.Texts.Por)
+          {
+            if ($.inArray(mine.Texts.Por, result.DeniedAlternatives) !== -1)
+              alert("Seu texto '"+mine.Texts.Por+"' está na lista de opções descartadas e"+
+                " será ignorado. " +
+                "Remova-o da lista antes de salvá-lo e insira-o novamente,"+
+                " se já não for considerado descartado. ")
+            else if ((! result.Texts.Por) || result.Texts.Por.length == 0)
+              result.Texts.Por = mine.Texts.Por
+            else if (result.Texts.Por !== mine.Texts.Por)
+            {
+              popupConflict(mine.Texts.Por, result.Texts.Por).then(function(ans)
+                {
+                  if (result.Texts.Por !== ans)
+                    result.DeniedAlternatives.push(result.Texts.Por)
+                  else
+                    result.DeniedAlternatives.push(mine.Texts.Por)
+                  result.Texts.Por = ans
+                  ok(result)
+                })
+              return
+            }
+          }
+          ok(result)
+        }
+      })
+    }
+
+    function popupConflict(mine, other)
+    {
+      return new Promise(function(ok, fail){
+        function selectGen(one)
+        {
+          return function()
+          {
+            $('#conflictbuttons').slideUp()
+            $('#particularconflict').slideUp()
+            $('#waiterconflict').slideDown()
+            ok(one)
+          }
+        }
+        $('#conflictbuttons').slideDown()
+        $('#waiterconflict').slideUp()
+        $('#particularconflict').slideDown()
+        $('#mineconflict').text(mine)
+        $('#otherconflict').text(other)
+        $('#prefermine').off('click')
+        $('#prefermine').on('click', selectGen(mine))
+        $('#preferother').off('click')
+        $('#preferother').on('click', selectGen(other))
+      })
+    }
+
+    function commit(account, editor)
+    {
+      let noconflict = account.getJSON(editor.filedata.url.slice(api_prefix.length))
+        .then(function(updated)
+        {
+          if (updated.content !== editor.filedata.content)
+            throw updated
+        })
+      let progressrefreshed = theWorker.send("refreshprogress")
+      let newjson = editor.get_json()
+      let translated = 0
+      for (let i in newjson)
+      {
+        var field = newjson[i]
+        if (typeof field['Texts']['Por'] == "string" &&
+          field['Texts']['Por'].length > 0)
+          translated++
+      }
+      let content = JSON.stringify(newjson, null, 2)
+      if (Base64.decode(editor.filedata.content) == content)
+      {
+        alert("Você está tentando salvar a tradução, mas nada mudou nela!\n"+
+          "Informações adicionais\nTocado: " + editor.touched +
+          "\nIdentidade:" + (Base64.decode(editor.filedata.content) == content));
+        return
+      }
+      if (!account.authdata.uname) {return}
+      let messagetext = $('#commitMessageText')[0].value
+      if (messagetext.length == 0) {messagetext = 'Atualização ' + editor.filedata.path}
+      let tree = []
+      tree.push(make_tree_entry(editor.filedata.path, content))
+      function on_progress(progress)
+      {
+        $('#commitProgress')[0].style.width = progress + '%'
+        $('#commitProgress')[0].setAttribute('aria-valuenow', progress)
+      }
+      function on_success(d, s, r)
+      {
+        editor.touched = false
+        editor.filedata.content = Base64.encode(
+          JSON.stringify(editor.get_json(), null, 2))
+        $('#commitWait').slideUp()
+        $('#commitMessageText')[0].value = ""
+        $('#commitSuccess').slideDown().delay(1500).slideUp()
+        theWorker.justSend("getstatus", {
+            path: editor.filedata.path,
+            id: "file-browser-progress-" + editor.filedata.name.replace(/[\./]/g, '-')
+          })
+      }
+      function on_fail(d, status, errorThrown)
+      {
+        let t = this
+        $('#commitWait').slideUp()
+        console.log(d)
+        console.log(status)
+        console.log(errorThrown)
+        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Na tentativa " +
+          "houve um erro ao salvar as alterações: " +
+          (errorThrown ? errorThrown: "erro desconhecido" ) + " status: " +
+          (status ? status: "desconhecido" ) + ". Informações adicionais:\n" +
+          JSON.stringify({ajax:d, self:t}, null, 2)
+        $('#commitFailed').slideDown().delay(10000).slideUp()
+      }
+      noconflict.catch(function(upd)
+      {
+        $('#conflictMessage').modal()
+        function finish(result)
+        {
+          $('#conflictMessage').modal('hide')
+          editor.reset()
+          editor.filedata = upd
+          editor.json_onload(result)
+        }
+        let upd_json = JSON.parse(Base64.decode(upd.content))
+        let obj = editor.get_json()
+        resolveConflict(obj, upd_json).then(finish).catch(function(reason){
+          alert('Os arquivos não podem ser combinados porque '+ reason +
+            '. as alterações serão descartadas.')
+          finish(upd_json)
+        })
+      })
+      let translation_updated = Promise.all([progressrefreshed, noconflict])
+        .then(function()
+      {
+        return theWorker.send("updatetranslated",
+          {value: translated, path: editor.filedata.path})
+      })
+
+      Promise.resolve(translation_updated).then(function(data)
+      {
+        if (data.needed)
+          tree.push(make_tree_entry("translations/translatedlabels.json",
+            JSON.stringify(data.json, null, 2)))
+        $('#commitProgress')[0].style.width = '0%'
+        $('#commitWait').slideDown()
+        let result = account.do_commit(messagetext, tree, on_progress)
+        result.then(on_success).catch(on_fail)
+      })
+    }
+
+    function statusUpdateHandler(data)
+    {
+      var obj = $('#' + data.id)
+      obj.width(data.val + '%')
+      obj.attr('aria-valuenow', data.val)
+      obj.html(Math.floor(data.val) + '% Traduzido')
+      obj.removeClass()
+      obj.addClass('progress-bar')
+      if (data.val < 50)
+        obj.addClass('progress-bar-danger')
+      else if (data.val < 100)
+        obj.addClass('progress-bar-warning')
+      else
+        obj.addClass('progress-bar-success')
+    }
+  </script>
+</head>
+<body>
+  <div class='wrapper container'>
+  <header style='height: 100px' class='container'>
+  <div class='row'>
+    <div class='col-sm-6'>
+    <h1>Tradução RPGGrowth</h1>
+     <div class="progress">
+        <div class="progress-bar" role="progressbar" id='global-progress'
+        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+          <span>0% traduzido</span>
+        </div>
+      </div>
+    </div>
+    <div class='col-sm-6'>
+      <form class="input-group" id='search-form' style='margin: 20px 0;'>
+        <span class='input-group-btn'>
+          <button type='submit' title="" class='btn btn-default' id='do_search'>
+          <span class='glyphicon glyphicon-search'></span></button>
+          <button class='btn btn-default dropdown-toggle' data-toggle="dropdown"
+            aria-haspopup="true" aria-expanded="false">
+          <span class='caret'></span></button>
+          <ul id='search-vars' class='dropdown-menu'>
+            <li id='searchcontent'><a href='javascript:void(0);'>Pesquisar o conteúdo de um arquivo</a></li>
+            <li id='searchfilename'><a href='javascript:void(0);'>Procurar por nome de arquivo ou recurso</a></li>
+          </ul>
+        </span>
+        <input type="text" id='searchstring' class="form-control" placeholder="">
+        </input>
+      </form>
+    </div>
+  </div>
+  </header>
+
+  <nav id='topnav' class='navbar navbar-default' data-spy='affix' data-offset-top='101'>
+  <div class='row container' id='editor-navbar' style='float:left; display: none'>
+    <div class='col-sm-4'>
+    <h3 id='current-filename'></h3>
+    </div>
+    <div class='col-sm-1'>
+      <button class='btn btn-block btn-default' style='margin: 7px 0;' id='paginationbackward'
+        onclick='$("#pagination-holder").animate({scrollLeft: "-=" + $("#pagination-holder").width()}, 500)'
+        ><span class='glyphicon glyphicon-triangle-left'></span></button>
+    </div>
+    <div class='col-sm-6' id='pagination-holder' style='overflow: hidden;'>
+    <ul id='editor-navigator' class='pagination maxcontent' style='margin: 7px 0;'></ul>
+    </div>
+    <div class='col-sm-1'>
+      <button class='btn btn-block btn-default' style='margin: 7px 0;' id='paginationforward'
+        onclick='$("#pagination-holder").animate({scrollLeft: "+=" + $("#pagination-holder").width()}, 500)'
+        ><span class='glyphicon glyphicon-triangle-right'></span></button>
+    </div>
+  </div>
+  <div class='row container' id='fm-navbar' style='float:left'>
+  <ul class='breadcrumb' id='fm-history'>
+  </ul>
+  </div>
+  </nav>
+
+  <div class='row container-fluid'>
+  <aside class='col-sm-2' id='sidebar-placeholder'>
+  <nav id='sidebar' class='navbar-default' data-spy='affix'
+    data-offset-top='97'>
+  <div id="editor-navigation"  style="display: none">
+    <button class="btn btn-default" onclick='$("#loginRequiredAlert").slideDown()'
+    type="button" id='commitButton'>Salvar</button>
+    <button class="btn btn-default" id='backtofm' type="button">Voltar</button>
+    <button class="btn btn-default"
+    onclick="$('#editor-holder div[data-schemapath=root]').children('h3')
+    .find('button.json-editor-btn-collapse').click();"
+    type="button">
+      Expandir</button>
+  </div>
+  <button class="btn btn-default"
+      onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
+      type="button">Voltar ao topo</button>
+  <div id='authorized' style='display: none'></div>
+  <div id='auth-failed' style='display: none'>Login falhou!
+  <div><button class="btn btn-default" type="button"
+    onclick="$('#auth-failed').slideUp(); $('#auth-form').slideDown()">
+    Tente novamente</button></div></div>
+  <form class="form-group" id="auth-form" style="display: none">
+    <input type='text' placeholder="Nome de usuário" class='form-control'
+    name='uname'></input>
+    <input type='password' placeholder='Senha' class='form-control' name='upass'>
+    </input>
+    <button class="btn btn-success"
+    id="do-login" type="submit">Login</button>
+    <a class="btn btn-default" target="_blank"
+    data-toggle="popover" data-placement="bottom" type="button"
+    href="https://github.com/join" data-trigger="hover"
+    data-content="Para trabalhar com a tradução você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta, o nome de usuário e senha que você pode usar neste site.">Registrar</a>
+  </form>
+  </nav>
+  </aside>
+
+  <section class='col-sm-10'><!-- content -->
+  <section style='position: fixed; z-index: 3; width:50%'>
+  <!-- Alerts-->
+  <div class="alert alert-success fade in" id='commitSuccess'
+  style='display:none;'>
+  <a href='javascript:$("#commitSuccess").slideUp()' class="close">&times;</a>
+  <strong>Sucesso!</strong> Suas alterações foram salvas com sucesso.!
+  </div>
+  <div class="alert alert-info" id='commitWait'
+  style='display:none'>
+  <p>Por favor, aguarde...</p>
+  <div class="progress">
+    <div class="progress-bar bar progress-bar-striped active" role="progressbar"
+      aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style='width: 0%'
+      id='commitProgress'>
+    </div>
+  </div>
+  </div>
+  <div class="alert alert-danger fade in" id='commitFailed'
+  style='display:none;'>
+  <a href='javascript:$("#commitFailed").slideUp()' class="close">&times;</a>
+  <p id='commitFailedText'></p>
+  </div>
+  <div class="alert alert-danger fade in" id='loginRequiredAlert'
+  style='display:none;'>
+  <a href='javascript:$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
+  <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
+  </div>
+  <!-- /Alerts-->
+  </section>
+
+  <section>
+  <!-- Forkage and pullage -->
+  <div class="col-sm-12 alert alert-info" id="forkRequired"
+  style="display:none;z-index:1">
+  <p class="col-sm-8">Parece que você não é um membro da equipe de tradutores.
+  Se você ainda quer traduzir, <a id="forkMeA">faça uma
+  cópia pessoal da</a>
+  tradução, traduza o tanto quanto você quiser, em seguida,
+  faça um pedido de mesclagem (pull request) da sua cópia pessoal para a tradução
+  principal. Se o pedido for aprovado, você terá
+  a oportunidade de se juntar à equipe de tradutores. Você também pode
+  continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
+  enviando pedidos para fundir sua versão da tradução com a tradução
+  principal.</p>
+  <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
+  cópia pessoal(fork)!</button>
+  </div>
+  <div class="col-sm-12 alert alert-info" id="pullRequired"
+  style="display:none;z-index:1">
+  <div class="col-sm-8">
+  <p id="pullText">Agora você trabalha com sua cópia pessoal
+  da tradução.</p><p>Eu recomendo que você leia <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">a descrição</a>, se você ainda não o fez. <p id="pullHint"> Faça
+  <a id="pullMeA" target="_blank"
+  href='https://help.github.com/articles/about-pull-requests/'>
+  um pedido de mesclagem (pull request)</a> assim que você fizer
+  mudanças nela e estiver pronto para oferecer sua tradução
+  para a tradução principal. Você também pode
+  <a id="toGH" href='#'>
+  ir no github</a> na sua cópia pessoal da tradução ou
+  <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
+  </div><div class="col-sm-4">
+  <button id="pullMe" class="btn btn-success" style="display:none;">
+  Pedido de mesclagem (pull request)</button>
+  <button id="syncMe" class="btn btn-default"
+  style="display:none">Sincronizar com a tradução principal</button>
+  </div>
+  </div>
+  <!-- /Forkage and pullage -->
+  </section>
+
+  <section>
+  <div id="file-browser">
+  </div>
+  <div id="editor-holder" style="display: none">
+  <div id='editor-holder-body'></div>
+  </div>
+  </section>
+
+  </section><!-- /content-->
+  </div><!-- /content row -->
+  </div><!-- /wrapper -->
+  <!--Search_results modal-->
+  <div id='searchResults' class='modal fade' role='dialog'>
+  <div class='modal-dialog modal-lg'>
+  <div class='modal-content'>
+  <div class='modal-header'>
+  <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Resultados da pesquisa</h4>
+  </div>
+  <div class='modal-body' style='overflow-y: auto'>
+    <div id='searchresult-holder'></div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+  </div></div></div></div><!--/Search_results modal-->
+  <!--Commit modal -->
+  <div id='commitMessage' class='modal fade' role='dialog'>
+  <div class='modal-dialog modal-lg'>
+  <div class='modal-content'>
+  <div class='modal-header'>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Comentário sobre mudanças</h4>
+  </div>
+  <div class='modal-body'>
+    Digite um comentário com uma breve descrição das mudanças feitas, bem como, possivelmente,
+    motivos para as decisões tomadas. Este comentário será salvo no histórico
+    de mudanças.
+    <textarea class='form-control input-lg' id='commitMessageText' rows='8'></textarea>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success" id='perform-commit'
+    data-dismiss="modal">
+    Salvar</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+  </div>
+  </div>
+  </div>
+  </div><!--/Commit modal -->
+
+  <!--Conflict modal -->
+  <div id='conflictMessage' class='modal fade' role='dialog'>
+  <div class='modal-dialog modal-lg'>
+  <div class='modal-content'>
+  <div class='modal-header'>
+    <h4 class="modal-title">O arquivo foi alterado por outro tradutor!</h4>
+  </div>
+  <div class='modal-body'>
+    <div id='waiterconflict'><p>O arquivo que você está tentando salvar foi alterado por
+    outro tradutor. Agora, sera feita uma tentativa de mesclar automaticamente as alterações.
+    </p>
+    <div class="progress">
+    <div class="progress-bar bar progress-bar-striped active" role="progressbar"
+      aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style='width: 100%'>
+    </div></div></div>
+    <div id="particularconflict" style="display: none" class="row">
+    <div class="col-sm-6"><h4>Minha tradução:</h4><p id="mineconflict"></p></div>
+    <div class="col-sm-6"><h4>Tradução de outro tradutor:</h4>
+    <p id="otherconflict"></p></div>
+    </div>
+  </div>
+  <div class="modal-footer" id="conflictbuttons" style="display: none">
+    <button type="button" class="btn btn-warning" id='prefermine'>
+    Registrar minha tradução</button>
+    <button type="button" class="btn btn-warning"
+    id='preferother'>Registrar a tradução de outro tradutor</button>
+  </div>
+  </div>
+  </div>
+  </div><!--/Conflict modal -->
+
+  <!--Unsaved modal -->
+  <div id='unsavedMessage' class='modal fade' role='dialog'>
+  <div class='modal-dialog modal-lg'>
+  <div class='modal-content'>
+  <div class='modal-header'>
+    <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <h4 class="modal-title">Há alterações não salvas</h4>
+  </div>
+  <div class='modal-body'>
+    Há alterações não salvas na página, quer descarta-las
+    e voltar à lista de arquivos?
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-success" data-dismiss="modal"
+    onclick="$('#commitButton').click(); $('#backtofm').click()">
+    Salvar alterações</button>
+    <button type="button" class="btn btn-warning" id='force-backtofm'
+    data-dismiss="modal">
+    Descartar alterações</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+  </div>
+  </div>
+  </div>
+  </div><!--/Unsaved modal -->
+
+  <script type="text/javascript">
+    "use strict";
+    var theWorker = {}
+    function adjust_floatside()
+      {$('#sidebar').width($('#sidebar-placeholder').width())}
+    $(document).ready(function()
+    {
+      $('[data-toggle="popover"]').popover()
+      let authdata = get_authdata()
+      let account = new GHAccount(authdata, "JuniorDark",
+        "RPGGrowth", 'master')
+      let callargs = get_call_arguments()
+      if (authdata == false)
+      {
+        document.getElementById('auth-form').style.display = ''
+      }
+      else
+      {
+        login(account,authdata)
+      }
+      theWorker = new ProWorker(account)
+      var progressrefreshed = theWorker.send("refreshprogress")
+      var editor = new theEditor($("#editor-holder-body").last(),
+        $("#editor-navigator").last())
+      adjust_floatside()
+      $(window).resize(adjust_floatside)
+      function on_file(json)
+      {
+        $("#editor-holder").slideDown()
+        $("#file-browser").slideUp()
+        $("#editor-navbar").slideDown()
+        $("#fm-navbar").slideUp()
+        $("#editor-navigation").slideDown()
+        editor.filedata = json
+        editor.open_json(Base64.decode(json.content), callargs.goto)
+      }
+
+      let filemanager = new FileManager($("#file-browser")[0],
+        $("#fm-history")[0], account, on_file)
+      let fmreturn = function(){backtofm(editor)}
+      $(window).bind('popstate', function(e){
+        let ev = e.originalEvent.state
+        if(ev && ev.json && ! ev.file_json)
+          fmreturn()
+      })
+      $('#perform-commit').on('click', function(){commit(account, editor)})
+      $('#backtofm').on('click', fmreturn)
+      $('#force-backtofm').on('click', function()
+      {
+        editor.touched = false;
+        backtofm(editor);
+      })
+      function bindEngineSelectHandler(target)
+      {
+        $('#search' + target).on('click', function(){
+          $('#do_search').attr('title', $(this).text())
+          $('#searchstring').attr('placeholder', $(this).text())
+          $('#search-form').off('submit')
+          $('#search-form').on('submit', function(e)
+            {
+              e.preventDefault()
+              //Clear previous results
+              $('#searchresult-holder-fmtree').children("tbody").html("")
+              let searchpattern = $('#searchstring').val()
+              theWorker.justSend("search" + target, {pattern: searchpattern})
+              $('#searchResults').modal()
+            })
+        })
+      }
+      bindEngineSelectHandler('content')
+      bindEngineSelectHandler('filename')
+      $('#searchfilename').click()
+      $('#auth-form').submit( function(event)
+      {
+        event.preventDefault()
+        login(account, $('#auth-form').serializeArray().reduce(function(o, i)
+          {
+            o[i.name] = i.value;
+            return o;
+          }, {}))
+      })
+
+      let listHolder = $('#searchresult-holder')
+      let resultsList = new FileManager(listHolder[0], null, null,
+        function(p){
+          let pattern = $('#searchstring').val()
+          let newwin = window.open('?open='+escape(p)+'&goto='+encodeURIComponent(pattern))
+          if (newwin)
+            newwin.focus()
+          else
+            alert("A janela pop-up foi bloqueada" +
+             "por favor, permita esta janela!")
+        })
+      theWorker.connect("getstatus", statusUpdateHandler)
+      theWorker.connect("foundresult", function(data)
+      {
+        resultsList.updateTree([{
+          name: data.slice("texts/".length),
+          size: 0,
+          path: "translations/" + data,
+          type: "file"
+        }], "")
+      })
+
+      progressrefreshed.then(function (){
+        if (callargs.open)
+          filemanager.gotoAdvancedPath(unescape(callargs.open), "none")
+        else
+          filemanager.gotoHome()
+        theWorker.justSend("getstatus",
+          {id: 'global-progress', path: 'translations/'})
+      })
+    })
+  </script>
+</body>
+</html>
