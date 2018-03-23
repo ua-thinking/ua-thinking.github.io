@@ -15,7 +15,7 @@ function disableEnableBtn(ids) {
         setTimeout( function() {
           document.getElementById(idbtn).removeAttribute('disabled');         // removes the "disabled" attribute
           document.getElementById(idbtn).innerHTML = 'Desativado';        // changes tne button text
-        }, 2000 );
+        }, 70000 );
       }
     }
   }
