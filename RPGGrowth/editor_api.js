@@ -237,7 +237,7 @@ theEditor.prototype.generate_label_checker = function(ii, maxwidth, maxheight)
       $(ed.subeditors[ii].root_container).addClass('alert-danger')
       $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
         .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
-        ' Лишних строк: '+ diff +'!</p>')
+        ' Linhas extras: '+ diff +'!</p>')
       $(ed.subeditors[ii].root_container).children('h3')
       .append('<span id="overflow-head">O texto é muito longo!</span>')
     }
