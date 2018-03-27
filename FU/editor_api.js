@@ -152,12 +152,12 @@ function makeCarousel(name)
 function referenceLookup(subtree, path)
 {
   let pageref = path.split('/').pop().split('.')[0]
-  let siteUrl = "https://starbounder.org"
+  let siteUrl = "http://frackinuniverse.wikia.com/wiki/"
   let apiUrl = siteUrl + "/mediawiki/api.php?"
   let to_replace = $(subtree).find('h3')
   let sysAnch = document.createElement("A")
   let container = document.createElement("DIV")
-  sysAnch.href = siteUrl + "/Data:" + pageref
+  sysAnch.href = siteUrl + "/" + pageref
   sysAnch.target = "_blank"
   sysAnch.innerHTML = path
   container.appendChild(sysAnch)
