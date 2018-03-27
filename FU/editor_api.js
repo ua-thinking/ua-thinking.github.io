@@ -157,7 +157,7 @@ function referenceLookup(subtree, path)
   let to_replace = $(subtree).find('h3')
   let sysAnch = document.createElement("A")
   let container = document.createElement("DIV")
-  sysAnch.href = siteUrl + "/" + pageref
+  sysAnch.href = siteUrl + pageref
   sysAnch.target = "_blank"
   sysAnch.innerHTML = path
   container.appendChild(sysAnch)
