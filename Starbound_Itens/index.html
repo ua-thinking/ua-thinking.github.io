@@ -6,14 +6,15 @@
   <meta charset="utf-8"></meta>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
   <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
-  <title>Tradução Starbound (Itens)</title>
-<script
-  src="https://code.jquery.com/jquery-3.3.1.min.js"
-  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-  crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://rawgit.com/ichord/At.js/master/dist/css/jquery.atwho.css"></link>
+  <title>Tradução Starbound</title>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
+  <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+  <script src="https://ichord.github.io/Caret.js/src/jquery.caret.js"></script>
+  <script src="https://rawgit.com/ichord/At.js/master/dist/js/jquery.atwho.min.js"></script>
   <script src="githubapi.js"></script>
   <script src="editor_api.js"></script>
   <script src="filemanager.js"></script>
@@ -49,7 +50,21 @@
   .pagination > .untranslated > a{
     background-image: linear-gradient(#d9edf7, transparent);
   }
+  .outlined
+  {
+    color: #ffffff;
+    text-shadow:
+    -1px -1px 0 #000000,
+    1px -1px 0 #000000,
+    -1px 1px 0 #000000,
+    1px 1px 0 #000000;
+  }
   </style>
+  <script>
+  ((window.gitter = {}).chat = {}).options = {
+    room: 'Starbound_Itens/translations'
+  };
+</script>
   <script type="text/javascript">
     "use strict";
     JSONEditor.defaults.options.theme = 'bootstrap3';
@@ -630,12 +645,12 @@
   </div>
   <div class="alert alert-danger fade in" id='commitFailed'
   style='display:none;'>
-  <a href='javascript:$("#commitFailed").slideUp()' class="close">&times;</a>
+  <a href='#' onclick='$("#commitFailed").slideUp()' class="close">&times;</a>
   <p id='commitFailedText'></p>
   </div>
   <div class="alert alert-danger fade in" id='loginRequiredAlert'
   style='display:none;'>
-  <a href='javascript:$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
+  <a href='#' onclick='$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
   <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
   </div>
   <!-- /Alerts-->
