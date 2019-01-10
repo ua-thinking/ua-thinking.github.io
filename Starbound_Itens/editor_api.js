@@ -23,7 +23,7 @@ const schema = {
           collapsed: true
         },
         items: {
-          title: "Opção",
+          title: "Adicionar",
           format: "text",
           type: "string",
         }
