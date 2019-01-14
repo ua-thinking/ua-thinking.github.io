@@ -429,10 +429,3 @@ function clickDelay(evt) {
       evt.target.classList.remove("special");
     },60000);
 }
-/* This class will be immediately added upon a click
-   and then removed 3 seconds later, causing the button
-   to return to its original style. */
-.special { 
-  background-color:red;
-  color:white;
-}
