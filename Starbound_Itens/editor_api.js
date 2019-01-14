@@ -417,10 +417,10 @@ theEditor.prototype.open_json = function (content, gotopattern)
   this.json_onload(data, gotopattern)
 }
 
-  //Get button reference
+  // Get button reference
 var btn = document.getElementById("perform-commit");
 
-//Set up event handler (do this in JavaScript, not HTML)
+// Set up event handler (do this in JavaScript, not HTML)
 btn.addEventListener("click", clickDelay);
 
 function clickDelay(evt) {
