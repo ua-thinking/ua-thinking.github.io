@@ -418,7 +418,7 @@ theEditor.prototype.open_json = function (content, gotopattern)
 }
 
   // Get button reference
-var btn = document.getElementById("commitButton");
+var btn = document.getElementById("perform-commit");
 
 // Set up event handler (do this in JavaScript, not HTML)
 btn.addEventListener("click", clickDelay);
@@ -428,11 +428,4 @@ function clickDelay(evt) {
     setTimeout(function(){
       evt.target.classList.remove("special");
     },60000);
-}
-/* This class will be immediately added upon a click
-   and then removed 3 seconds later, causing the button
-   to return to its original style. */
-.special { 
-  background-color:red;
-  color:white;
 }
