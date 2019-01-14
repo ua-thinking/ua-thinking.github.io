@@ -416,3 +416,23 @@ theEditor.prototype.open_json = function (content, gotopattern)
   let data = $.parseJSON(content)
   this.json_onload(data, gotopattern)
 }
+
+  // Get button reference
+var btn = document.getElementById("commitButton");
+
+// Set up event handler (do this in JavaScript, not HTML)
+btn.addEventListener("click", clickDelay);
+
+function clickDelay(evt) {
+    evt.target.classList.add("special");
+    setTimeout(function(){
+      evt.target.classList.remove("special");
+    },60000);
+}
+/* This class will be immediately added upon a click
+   and then removed 3 seconds later, causing the button
+   to return to its original style. */
+.special { 
+  background-color:red;
+  color:white;
+}
