@@ -23,7 +23,7 @@ const schema = {
           collapsed: true
         },
         items: {
-          title: "Adicionar",
+          title: "Opção",
           format: "text",
           type: "string",
         }
@@ -259,6 +259,76 @@ theEditor.prototype.generate_label_checker = function(ii, maxwidth, maxheight)
 theEditor.prototype.load_part = function (start, selected)
 {
   this.subeditors = {}
+  var fin = true // if we need to place closing '>' brace
+
+  var endings = []
+
+  // Helps to match the autocompletion sequence regardless of spaces
+  let matcher = function (flag, reverse, c) {
+    for (var i = reverse.length-1; i>=0; i--) {
+      if (reverse[i] == '>' || reverse[i] == ' ') { return }
+      else if (reverse[i] == flag) {
+        return reverse.substr(i+1)
+      }
+    }
+  }
+
+  let color_autocompletion = {
+    at: "^",
+    delay: 1,
+    displayTpl: "<li class='outlined' style='color:${name};'><b>${name}</b></li>",
+    insertTpl: "^${name};",
+    callbacks: {
+      matcher: matcher
+    }
+  }
+
+  let tag_autocompletion = {
+    at: "<",
+    callbacks: {
+      filter: function (query, data, key) {
+        var result = []
+        let query_parts = query.split('.')
+        let q_till_dot = query_parts[0]
+        let submatch = query_parts.length == 1
+        //no dots, using startsWith
+        // otherwise the full match is needed
+        for (var i = 0; i < data.length; i++) {
+          if ((submatch && data[i].name.startsWith(q_till_dot))
+              || data[i].name == q_till_dot) {
+            result.push({name: data[i].name, desc: data[i].desc})
+          }
+        }
+        fin = false // the second suggestion is possible
+        if (result.length == 1) {
+          if (result[0].name == q_till_dot) {fin = true}
+          // we have a final suggestion, so closing brace anyway
+          var exist = {}
+          if (query_parts.length > 1) {
+            exist[query_parts[1]] = true
+          }
+          for (var i = 0;i < endings.length; i++) {
+            let ending = endings[i].name
+            let spl = ending.split('.')
+            if (spl.length > 1 && ! exist[spl[0]]) {
+              exist[spl[0]] = true
+              result.push({name: result[0].name + '.' + spl[0] + '.', desc: "..."})
+            }
+            let with_ending = result[0].name + '.' + endings[i].name
+            if (with_ending.startsWith(query)) {
+              result.push({name: with_ending, desc: endings[i].desc})
+            }
+          }
+        }
+        return result
+      },
+      matcher: matcher
+    },
+    displayTpl: "<li>${name} <a style='color: #585858'>${desc}</a></li>",
+    insertTpl: "<${name}>",
+    limit: 500,
+    delay: 1
+  }
   this.holder.html("")
   var ed = this
   var to_highlight = []
@@ -303,10 +373,27 @@ theEditor.prototype.load_part = function (start, selected)
   $(this.holder).find("[name$=\"[Eng]\"]").each(function(i,d){d.readOnly=true})
   $(this.holder).find("[name$=\"[Comment]\"]").each(function(i,d){d.readOnly=true})
   $(this.holder).find("textarea[name$=\"]\"]").each(function(i,d){
-      d.className = 'input-lg form-control'
+      d.className = 'input-lg form-control inputor'
+      $(d).atwho(color_autocompletion)
+          .atwho(tag_autocompletion)
+          .on("inserted.atwho", function(e,l,be) {
+        let pos = e.target.selectionStart
+        // The tag can not end with '.'
+        if (e.target.value[pos-3] == '.') {fin = false}
+        if (fin) {return} // let autocompleter finish its job
+        fin = true
+        let old = e.target.value
+        e.target.value = old.substr(0, pos-2) + old.substr(pos)
+        e.target.selectionStart = pos - 2
+        e.target.selectionEnd = pos - 2
+        let atwho = $(e.target).data('atwho')
+        // show autocompleter with updated suggestions again after a short
+        // time to prevent its immediate disappearence
+        setTimeout(function() {atwho.dispatch({type: "click"})}, 100)
+      })
       if (d.value.length != 0)
       {
-        d.rows = Math.ceil(d.value.length/27)
+        d.rows = Math.max(Math.ceil(d.value.length/27), d.rows)
       }
     })
   $(this.holder).find('div[data-schemapath^="root.Files."]').each(function(i,c){

@@ -6,14 +6,15 @@
   <meta charset="utf-8"></meta>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
   <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
+  <link rel="stylesheet" href="https://rawgit.com/ichord/At.js/master/dist/css/jquery.atwho.css"></link>
   <title>Tradução Starbound</title>
-<script
-  src="https://code.jquery.com/jquery-3.3.1.min.js"
-  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-  crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
+  <script src="https://sidecar.gitter.im/dist/sidecar.v1.js" async defer></script>
+  <script src="https://ichord.github.io/Caret.js/src/jquery.caret.js"></script>
+  <script src="https://rawgit.com/ichord/At.js/master/dist/js/jquery.atwho.min.js"></script>
   <script src="githubapi.js"></script>
   <script src="editor_api.js"></script>
   <script src="filemanager.js"></script>
@@ -48,6 +49,15 @@
   }
   .pagination > .untranslated > a{
     background-image: linear-gradient(#d9edf7, transparent);
+  }
+  .outlined
+  {
+    color: #ffffff;
+    text-shadow:
+    -1px -1px 0 #000000,
+    1px -1px 0 #000000,
+    -1px 1px 0 #000000,
+    1px 1px 0 #000000;
   }
   </style>
   <script type="text/javascript">
@@ -399,11 +409,30 @@
 
     function commit(account, editor)
     {
+      function onconflict(upd)
+      {
+        $('#conflictMessage').modal()
+        function finish(result)
+        {
+          $('#conflictMessage').modal('hide')
+          editor.reset()
+          editor.filedata = upd
+          editor.json_onload(result)
+        }
+        let upd_json = JSON.parse(Base64.decode(upd.content))
+        let obj = editor.get_json()
+        resolveConflict(obj, upd_json).then(finish).catch(function(reason){
+          alert('Os arquivos não podem ser combinados porque '+ reason +
+            '. as alterações serão descartadas.')
+          finish(upd_json)
+        })
+      }
       let noconflict = account.getJSON(editor.filedata.url.slice(api_prefix.length))
         .then(function(updated)
         {
-          if (updated.content !== editor.filedata.content)
-            throw updated
+          if (updated.content !== editor.filedata.content) {
+            onconflict(updated)
+          }
         })
       let progressrefreshed = theWorker.send("refreshprogress")
       let newjson = editor.get_json()
@@ -440,7 +469,7 @@
           JSON.stringify(editor.get_json(), null, 2))
         $('#commitWait').slideUp()
         $('#commitMessageText')[0].value = ""
-        $('#commitSuccess').slideDown().delay(1500).slideUp()
+        $('#commitSuccess').slideDown().delay(2000).slideUp()
         theWorker.justSend("getstatus", {
             path: editor.filedata.path,
             id: "file-browser-progress-" + editor.filedata.name.replace(/[\./]/g, '-')
@@ -460,24 +489,6 @@
           JSON.stringify({ajax:d, self:t}, null, 2)
         $('#commitFailed').slideDown().delay(10000).slideUp()
       }
-      noconflict.catch(function(upd)
-      {
-        $('#conflictMessage').modal()
-        function finish(result)
-        {
-          $('#conflictMessage').modal('hide')
-          editor.reset()
-          editor.filedata = upd
-          editor.json_onload(result)
-        }
-        let upd_json = JSON.parse(Base64.decode(upd.content))
-        let obj = editor.get_json()
-        resolveConflict(obj, upd_json).then(finish).catch(function(reason){
-          alert('Os arquivos não podem ser combinados porque '+ reason +
-            '. as alterações serão descartadas.')
-          finish(upd_json)
-        })
-      })
       let translation_updated = Promise.all([progressrefreshed, noconflict])
         .then(function()
       {
@@ -537,7 +548,7 @@
           <span class='caret'></span></button>
           <ul id='search-vars' class='dropdown-menu'>
             <li id='searchcontent'><a href='javascript:void(0);'>Pesquisar o conteúdo de um arquivo</a></li>
-            <li id='searchfilename'><a href='javascript:void(0);'>Procurar por nome de arquivo ou recurso</a></li>
+            <li id='searchfilename'><a href='javascript:void(0);'>Pesquisar por nome de arquivo ou recurso</a></li>
           </ul>
         </span>
         <input type="text" id='searchstring' class="form-control" placeholder="">
@@ -614,7 +625,7 @@
   <!-- Alerts-->
   <div class="alert alert-success fade in" id='commitSuccess'
   style='display:none;'>
-  <a href='javascript:$("#commitSuccess").slideUp()' class="close">&times;</a>
+  <a href='#' onclick='$("#commitSuccess").slideUp()' class="close">&times;</a>
   <strong>Sucesso!</strong> Suas alterações foram salvas com sucesso.!
   </div>
   <div class="alert alert-info" id='commitWait'
@@ -629,12 +640,12 @@
   </div>
   <div class="alert alert-danger fade in" id='commitFailed'
   style='display:none;'>
-  <a href='javascript:$("#commitFailed").slideUp()' class="close">&times;</a>
+  <a href='#' onclick='$("#commitFailed").slideUp()' class="close">&times;</a>
   <p id='commitFailedText'></p>
   </div>
   <div class="alert alert-danger fade in" id='loginRequiredAlert'
   style='display:none;'>
-  <a href='javascript:$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
+  <a href='#' onclick='$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
   <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
   </div>
   <!-- /Alerts-->
