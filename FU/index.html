@@ -11,7 +11,7 @@
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="https://rawgit.com/dankogai/js-base64/master/base64.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-base64@3.0.2/base64.min.js"></script>
   <script src="https://ichord.github.io/Caret.js/src/jquery.caret.js"></script>
   <script src="https://rawgit.com/ichord/At.js/master/dist/js/jquery.atwho.min.js"></script>
   <script src="githubapi.js"></script>
@@ -607,14 +607,14 @@
   <form class="form-group" id="auth-form" style="display: none">
     <input type='text' placeholder="Nome de usuário" class='form-control'
     name='uname'></input>
-    <input type='password' placeholder='Senha' class='form-control' name='upass'>
+    <input type='password' placeholder='Personal access token' class='form-control' name='upass'>
     </input>
     <button class="btn btn-success"
     id="do-login" type="submit">Login</button>
     <a class="btn btn-default" target="_blank"
     data-toggle="popover" data-placement="bottom" type="button"
     href="https://github.com/join" data-trigger="hover"
-    data-content="Para trabalhar com a tradução você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta, o nome de usuário e senha que você pode usar neste site.">Registrar</a>
+    data-content="Para trabalhar com a tradução você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta. Nota: Você precisara criar um Personal access token para poder logar neste site.">Registrar</a>
   </form>
   </nav>
   </aside>

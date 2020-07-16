@@ -1,5 +1,5 @@
 "use strict";
-importScripts("githubapi.js", "https://rawgit.com/dankogai/js-base64/master/base64.min.js")
+importScripts("githubapi.js", "https://cdn.jsdelivr.net/npm/js-base64@3.0.2/base64.min.js")
 
 var totalfiles = {}
 var translatedfiles = {}
