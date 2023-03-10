@@ -82,7 +82,7 @@ GHAccount.prototype.get_repo_suffix = function()
 GHAccount.prototype.ifNotAMember = function ()
 {
   let acc = this
-  let url = "orgs/" + "starboundUA" + "/members/" + acc.authdata.uname
+  let url = "orgs/" + "ua-thinking" + "/members/" + acc.authdata.uname
   return new Promise(function(ok, fail) {
     acc.rawRequest(url, "GET", {}).catch(ok).then(function(){})
   })
