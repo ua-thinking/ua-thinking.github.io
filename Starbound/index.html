@@ -7,7 +7,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet" id="icon_stylesheet">
   <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" id="theme_stylesheet">
   <link rel="stylesheet" href="https://rawgit.com/ichord/At.js/master/dist/css/jquery.atwho.css"></link>
-  <title>Tradução Starbound</title>
+  <title>Переклад Starbound</title>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
   <script type="text/javascript" src="https://rawgit.com/jdorn/json-editor/master/dist/jsoneditor.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -211,18 +211,18 @@
               })
               $('#pullRequired').slideDown()
               $('#resetFork').click(function() {
-                if (confirm("Tem certeza de que deseja excluir todos os seus dados?"+
-                  " Após esta ação você iniciará a tradução do mesmo local," +
-                  " onde a equipe parou no momento na tradução principal."))
+                if (confirm("Ви впевнені, що хочете видалити всі свої дані?"+
+                  " Після цієї дії ви почнете переклад з того самого місця," +
+                  " де команда зупинилася на даний момент в основному перекладі."))
                 account.rawRequest(account.get_repo_suffix(), "DELETE")
                   .then(function(){
-                    alert("Todos os seus dados foram excluídos com sucesso! " +
-                      "A página será recarregada.")
+                    alert("Всі ваші дані успішно видалено! " +
+                      "Сторінка перезавантажиться.")
                       location.reload(true)
-                    }).fail(function(){alert("Não foi possível remover o seu " +
-                      "repositório! Tente fazêr manualmente" +
-                      " na página de configurações do repositório em github.com" +
-                      ", para a qual você será redirecionada.")
+                    }).fail(function(){alert("Не вдалося видалити ваш " +
+                      "репозиторій! Спробуйте зробити це вручну" +
+                      " на сторінці конфігурації репозиторію на github.com" +
+                      ", на яку ви будете перенаправлені.")
                       let w = window.open('https://github.com/' +
                         account.authdata.uname + '/' + account.repo +
                         '/settings')
@@ -240,7 +240,7 @@
                 {return}
                 console.log(data)
                 $('#pullHint').slideDown()
-                let text = "Você trabalha com uma cópia pessoal da tradução. No momento,"
+                let text = "Ви працюєте з персональною копією перекладу. На даний момент,"
                 let prefix = ""
                 if (data.ahead_by > 0)
                 {
@@ -250,7 +250,7 @@
                     w.focus()
                   }
                   $('#pullMe').click(openPR)
-                  text += " número de alterações que você fez desde o último pedido de mesclagem (pull request): " +
+                  text += " кількість змін, які ви внесли з моменту останнього pull-запиту: " +
                     data.ahead_by + ";"
                   prefix = " а"
                 }
@@ -259,36 +259,36 @@
                   let sync_cb = function(){
                     let m = account.mergeFrom(data.base_commit.sha)
                     m.then(function(a){
-                      alert("Sincronização bem sucedida. A página será atualizada quando esta janela for fechada.")
+                      alert("Синхронізація пройшла успішно. Сторінка буде оновлена, коли це вікно буде закрито.")
                       window.location.reload()
                     }, function(a){
                       console.log(a)
-                      alert("Você não pode sincronizar com o repositório de conversão principal. Pode haver conflitos. Tente resolvê-los manualmente ou entre em contato com a equipe de tradução para obter ajuda.")
+                      alert("Ви не можете синхронізуватися з основним репозиторієм. Можливо, виникли конфлікти. Спробуйте вирішити їх вручну або зверніться по допомогу до команди перекладачів.")
                     })
                   }
                   $('#syncMe').slideDown()
                   $('#syncMe').click(sync_cb)
-                  text += prefix + " número de alterações feitas pela equipe de tradução desde a última sincronização: " + data.behind_by + ";"
+                  text += prefix + " кількість змін, внесених командою перекладачів з моменту останньої синхронізації: " + data.behind_by + ";"
                   if (data.behind_by > 20)
                   {
-                    text += " lembre-se, quanto maior a diferença entre sua cópia pessoal e a tradução principal, mais provável será o conflito quando você fundir!"
+                    text += " пам'ятайте, що чим більша різниця між вашою особистою копією та основним перекладом, тим більша ймовірність конфлікту при злитті!"
                   }
                 }
                 text += " <a href='" + data.html_url +
-                  "' target='_blank'>Saiba mais...</a>"
+                  "' target='_blank'>Дізнайтеся більше...</a>"
                 $('#pullText').html(text)
               })
             }
             let no_fork = function(a){
-              console.log("O usuário não tem fork")
+              console.log("У вас немає форку")
               let forker = function()
               {
                 let fork_succeed = function(a) {
-                  alert("Foi criada uma cópia pessoal da tradução! Você será redirecionado para ela depois de fechar esta janela.")
+                  alert("Персональна копія перекладу створена! Ви будете перенаправлені до неї після закриття цього вікна.")
                   window.location.reload()
                 }
                 let fork_failed = function(a) {
-                  alert("Falha ao criar uma cópia pessoal! " +
+                  alert("Не вдалося створити особисту копію! " +
                     a.response + ", " + a.responseText)
                   console.log(a)
                 }
@@ -298,7 +298,7 @@
               $('#forkMeA').click(forker)
               $('#forkRequired').slideDown()
             }
-            console.log("Não é um membro")
+            console.log("Не є членом")
             account.ifHasFork().then(has_fork, no_fork)
             console.log(a)
           })
@@ -343,10 +343,10 @@
     {
       return new Promise(function(ok, fail)
       {
-        if (mine.Comment !== other.Comment) fail("seção mudou")
+        if (mine.Comment !== other.Comment) fail("розділ змінено")
         else if (JSON.stringify(mine.Files) !== JSON.stringify(other.Files))
-          fail("o banco de dados foi atualizado")
-        else if (mine.Texts.Eng !== other.Texts.Eng) fail("O texto em inglês mudou")
+          fail("оновлено базу даних")
+        else if (mine.Texts.Eng !== other.Texts.Eng) fail("Текст англійською мовою змінено")
         else
         {
           let result = JSON.parse(JSON.stringify(other))
@@ -356,10 +356,10 @@
           if (mine.Texts.Por)
           {
             if ($.inArray(mine.Texts.Por, result.DeniedAlternatives) !== -1)
-              alert("Seu texto '"+mine.Texts.Por+"' está na lista de opções descartadas e"+
-                " será ignorado. " +
-                "Remova-o da lista antes de salvá-lo e insira-o novamente,"+
-                " se já não for considerado descartado. ")
+              alert("Seu texto '"+mine.Texts.Por+"' знаходиться у списку відкинутих варіантів, а"+
+                " буде проігноровано. " +
+                "Видаліть його зі списку перед збереженням і вставте знову,"+
+                " якщо він ще не вважається викинутим. ")
             else if ((! result.Texts.Por) || result.Texts.Por.length == 0)
               result.Texts.Por = mine.Texts.Por
             else if (result.Texts.Por !== mine.Texts.Por)
@@ -421,8 +421,8 @@
         let upd_json = JSON.parse(Base64.decode(upd.content))
         let obj = editor.get_json()
         resolveConflict(obj, upd_json).then(finish).catch(function(reason){
-          alert('Os arquivos não podem ser combinados porque '+ reason +
-            '. as alterações serão descartadas.')
+          alert('Файли не можуть бути об`єднані, оскільки '+ reason +
+            '. зміни будуть відкинуті.')
           finish(upd_json)
         })
       }
@@ -446,14 +446,14 @@
       let content = JSON.stringify(newjson, null, 2)
       if (Base64.decode(editor.filedata.content) == content)
       {
-        alert("Você está tentando salvar a tradução, mas nada mudou nela!\n"+
-          "Informações adicionais\nTocado: " + editor.touched +
-          "\nIdentidade:" + (Base64.decode(editor.filedata.content) == content));
+        alert("Ви намагаєтеся зберегти переклад, але в ньому нічого не змінено!\n"+
+          "Додаткова інформація\nTocado: " + editor.touched +
+          "\nІдентичність:" + (Base64.decode(editor.filedata.content) == content));
         return
       }
       if (!account.authdata.uname) {return}
       let messagetext = $('#commitMessageText')[0].value
-      if (messagetext.length == 0) {messagetext = 'Atualização ' + editor.filedata.path}
+      if (messagetext.length == 0) {messagetext = 'Оновлення ' + editor.filedata.path}
       let tree = []
       tree.push(make_tree_entry(editor.filedata.path, content))
       function on_progress(progress)
@@ -481,10 +481,10 @@
         console.log(d)
         console.log(status)
         console.log(errorThrown)
-        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Na tentativa " +
-          "houve um erro ao salvar as alterações: " +
-          (errorThrown ? errorThrown: "erro desconhecido" ) + " status: " +
-          (status ? status: "desconhecido" ) + ". Informações adicionais:\n" +
+        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Під час спроби " +
+          "сталася помилка при збереженні змін: " +
+          (errorThrown ? errorThrown: "невідома помилка" ) + " status: " +
+          (status ? status: "невідомо" ) + ". Додаткова інформація:\n" +
           JSON.stringify({ajax:d, self:t}, null, 2)
         $('#commitFailed').slideDown().delay(10000).slideUp()
       }
@@ -512,7 +512,7 @@
       var obj = $('#' + data.id)
       obj.width(data.val + '%')
       obj.attr('aria-valuenow', data.val)
-      obj.html(Math.floor(data.val) + '% Traduzido')
+      obj.html(Math.floor(data.val) + '% Перекладено')
       obj.removeClass()
       obj.addClass('progress-bar')
       if (data.val < 50)
@@ -529,11 +529,11 @@
   <header style='height: 100px' class='container'>
   <div class='row'>
     <div class='col-sm-6'>
-    <h1>Tradução Starbound</h1>
+    <h1>Переклад Starbound</h1>
      <div class="progress">
         <div class="progress-bar" role="progressbar" id='global-progress'
         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width:0%">
-          <span>0% traduzido</span>
+          <span>0% перекладено</span>
         </div>
       </div>
     </div>
@@ -546,8 +546,8 @@
             aria-haspopup="true" aria-expanded="false">
           <span class='caret'></span></button>
           <ul id='search-vars' class='dropdown-menu'>
-            <li id='searchcontent'><a href='javascript:void(0);'>Pesquisar o conteúdo de um arquivo</a></li>
-            <li id='searchfilename'><a href='javascript:void(0);'>Pesquisar por nome de arquivo ou recurso</a></li>
+            <li id='searchcontent'><a href='javascript:void(0);'>Пошук вмісту файлу</a></li>
+            <li id='searchfilename'><a href='javascript:void(0);'>Пошук за назвою файлу або ресурсу</a></li>
           </ul>
         </span>
         <input type="text" id='searchstring' class="form-control" placeholder="">
@@ -588,33 +588,33 @@
     data-offset-top='97'>
   <div id="editor-navigation"  style="display: none">
     <button class="btn btn-default" onclick='$("#loginRequiredAlert").slideDown()'
-    type="button" id='commitButton'>Salvar</button>
-    <button class="btn btn-default" id='backtofm' type="button">Voltar</button>
+    type="button" id='commitButton'>Зберегти</button>
+    <button class="btn btn-default" id='backtofm' type="button">Назад</button>
     <button class="btn btn-default"
     onclick="$('#editor-holder div[data-schemapath=root]').children('h3')
     .find('button.json-editor-btn-collapse').click();"
     type="button">
-      Expandir</button>
+      Розгорнути</button>
   </div>
   <button class="btn btn-default"
       onclick="$('html, body').stop().animate({scrollTop: 0}, 1000)"
-      type="button">Voltar ao topo</button>
+      type="button">Повернутися до початку</button>
   <div id='authorized' style='display: none'></div>
-  <div id='auth-failed' style='display: none'>Login falhou!
+  <div id='auth-failed' style='display: none'>Не вдалося увійти!
   <div><button class="btn btn-default" type="button"
     onclick="$('#auth-failed').slideUp(); $('#auth-form').slideDown()">
-    Tente novamente</button></div></div>
+    Спробуйте ще раз.</button></div></div>
   <form class="form-group" id="auth-form" style="display: none">
-    <input type='text' placeholder="Nome de usuário" class='form-control'
+    <input type='text' placeholder="Ім'я користувача" class='form-control'
     name='uname'></input>
     <input type='password' placeholder='Personal access token' class='form-control' name='upass'>
     </input>
     <button class="btn btn-success"
-    id="do-login" type="submit">Login</button>
+    id="do-login" type="submit">Увійти</button>
     <a class="btn btn-default" target="_blank"
     data-toggle="popover" data-placement="bottom" type="button"
     href="https://github.com/join" data-trigger="hover"
-    data-content="Para trabalhar com a tradução você precisará de uma conta no github.com. Este botão irá levá-lo para a página de registro de uma nova conta. Nota: Você precisara criar um Personal access token para poder logar neste site.">Registrar</a>
+    data-content="Для роботи з перекладом вам знадобиться акаунт на github.com. Ця кнопка переведе вас на сторінку реєстрації нового акаунта. Примітка: Для входу на цей сайт вам потрібно буде створити персональний токен доступу.">Зареєструватись</a>
   </form>
   </nav>
   </aside>
@@ -625,11 +625,11 @@
   <div class="alert alert-success fade in" id='commitSuccess'
   style='display:none;'>
   <a href='#' onclick='$("#commitSuccess").slideUp()' class="close">&times;</a>
-  <strong>Sucesso!</strong> Suas alterações foram salvas com sucesso.!
+  <strong>Успішно!</strong> Ваші зміни успішно збережено!
   </div>
   <div class="alert alert-info" id='commitWait'
   style='display:none'>
-  <p>Por favor, aguarde...</p>
+  <p>Будь ласка, зачекайте...</p>
   <div class="progress">
     <div class="progress-bar bar progress-bar-striped active" role="progressbar"
       aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style='width: 0%'
@@ -645,7 +645,7 @@
   <div class="alert alert-danger fade in" id='loginRequiredAlert'
   style='display:none;'>
   <a href='#' onclick='$("#loginRequiredAlert").slideUp()' class="close">&times;</a>
-  <strong>Erro!</strong> Você deve estar logado para salvar as alterações.
+  <strong>Помилка!</strong> Ви повинні увійти в систему, щоб зберегти зміни.
   </div>
   <!-- /Alerts-->
   </section>
@@ -654,37 +654,37 @@
   <!-- Forkage and pullage -->
   <div class="col-sm-12 alert alert-info" id="forkRequired"
   style="display:none;z-index:1">
-  <p class="col-sm-8">Parece que você não é um membro da equipe de tradutores.
-  Se você ainda quer traduzir, <a id="forkMeA">faça uma
-  cópia pessoal da</a>
-  tradução, traduza o tanto quanto você quiser, em seguida,
-  faça um pedido de mesclagem (pull request) da sua cópia pessoal para a tradução
-  principal. Se o pedido for aprovado, você terá
-  a oportunidade de se juntar à equipe de tradutores. Você também pode
-  continuar a traduzir sem juntar-se à equipe, mas apenas periodicamente
-  enviando pedidos para fundir sua versão da tradução com a tradução
-  principal.</p>
-  <button class="col-sm-4 btn btn-success" id="forkMe">Fazer
-  cópia pessoal(fork)!</button>
+  <p class="col-sm-8">Схоже, що ви не є членом команди перекладачів.
+  Якщо ви все ще хочете перекладати, <a id="forkMeA">зробити
+  особисту копію</a>
+  перекладу, перекладайте стільки, скільки хочете, а потім
+  перенесіть запит з вашої особистої копії в основний переклад.
+  основний переклад. Якщо заявку буде схвалено, ви матимете
+  можливість приєднатися до команди перекладачів. Ви також можете
+  продовжувати перекладати, не приєднуючись до команди, але лише періодично
+  надсилати запити на об'єднання вашої версії перекладу з основним перекладом.
+  основний переклад.</p>
+  <button class="col-sm-4 btn btn-success" id="forkMe">Зробіть
+  особисту копію (форк)!</button>
   </div>
   <div class="col-sm-12 alert alert-info" id="pullRequired"
   style="display:none;z-index:1">
   <div class="col-sm-8">
-  <p id="pullText">Agora você trabalha com sua cópia pessoal
-  da tradução.</p><p>Eu recomendo que você leia <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">a descrição</a>, se você ainda não o fez. <p id="pullHint"> Faça
+  <p id="pullText">Тепер ви працюєте зі своєю особистою копією
+  перекладу.</p><p>Рекомендую почитати <a href="https://github.com/JuniorDark/Starbound_PTBR" target="_blank" class="gloshref">опис</a>, якщо ви цього ще не зробили. <p id="pullHint"> Зробіть
   <a id="pullMeA" target="_blank"
   href='https://help.github.com/articles/about-pull-requests/'>
-  um pedido de mesclagem (pull request)</a> assim que você fizer
-  mudanças nela e estiver pronto para oferecer sua tradução
-  para a tradução principal. Você também pode
+  запит на pull request</a> після того, як ви внесли до нього
+  зміни до нього і готові запропонувати свій переклад
+  до основного перекладу. Ви також можете
   <a id="toGH" href='#'>
-  ir no github</a> na sua cópia pessoal da tradução ou
-  <a id="resetFork" href='#'>reiniciar</a> todas as suas mudanças.</p>
+  перейти на github</a> ваш особистий форк перекладу або
+  <a id="resetFork" href='#'>перезавантаження</a> всі ваші зміни.</p>
   </div><div class="col-sm-4">
   <button id="pullMe" class="btn btn-success" style="display:none;">
-  Pedido de mesclagem (pull request)</button>
+  Запит на pull request</button>
   <button id="syncMe" class="btn btn-default"
-  style="display:none">Sincronizar com a tradução principal</button>
+  style="display:none">Синхронізувати з основним перекладом</button>
   </div>
   </div>
   <!-- /Forkage and pullage -->
@@ -707,13 +707,13 @@
   <div class='modal-content'>
   <div class='modal-header'>
   <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">Resultados da pesquisa</h4>
+    <h4 class="modal-title">Результати пошуку</h4>
   </div>
   <div class='modal-body' style='overflow-y: auto'>
     <div id='searchresult-holder'></div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Скасувати</button>
   </div></div></div></div><!--/Search_results modal-->
   <!--Commit modal -->
   <div id='commitMessage' class='modal fade' role='dialog'>
@@ -721,19 +721,19 @@
   <div class='modal-content'>
   <div class='modal-header'>
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">Comentário sobre mudanças</h4>
+    <h4 class="modal-title">Прокоментуйте зміни</h4>
   </div>
   <div class='modal-body'>
-    Digite um comentário com uma breve descrição das mudanças feitas, bem como, possivelmente,
-    motivos para as decisões tomadas. Este comentário será salvo no histórico
-    de mudanças.
+    Введіть коментар з коротким описом внесених змін, а також, можливо,
+    причини прийнятих рішень. Цей коментар буде збережено у файлі
+    змінах.
     <textarea class='form-control input-lg' id='commitMessageText' rows='8'></textarea>
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-success" id='perform-commit'
     data-dismiss="modal">
-    Salvar</button>
-    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+    Зберегти</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Скасувати</button>
   </div>
   </div>
   </div>
@@ -744,27 +744,27 @@
   <div class='modal-dialog modal-lg'>
   <div class='modal-content'>
   <div class='modal-header'>
-    <h4 class="modal-title">O arquivo foi alterado por outro tradutor!</h4>
+    <h4 class="modal-title">Файл змінено іншим перекладачем!</h4>
   </div>
   <div class='modal-body'>
-    <div id='waiterconflict'><p>O arquivo que você está tentando salvar foi alterado por
-    outro tradutor. Agora, sera feita uma tentativa de mesclar automaticamente as alterações.
+    <div id='waiterconflict'><p>Файл, який ви намагаєтеся зберегти, був змінений
+    іншим перекладачем. Буде зроблено спробу автоматично об'єднати зміни.
     </p>
     <div class="progress">
     <div class="progress-bar bar progress-bar-striped active" role="progressbar"
       aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style='width: 100%'>
     </div></div></div>
     <div id="particularconflict" style="display: none" class="row">
-    <div class="col-sm-6"><h4>Minha tradução:</h4><p id="mineconflict"></p></div>
-    <div class="col-sm-6"><h4>Tradução de outro tradutor:</h4>
+    <div class="col-sm-6"><h4>Мій переклад:</h4><p id="mineconflict"></p></div>
+    <div class="col-sm-6"><h4>Переклад іншого перекладача:</h4>
     <p id="otherconflict"></p></div>
     </div>
   </div>
   <div class="modal-footer" id="conflictbuttons" style="display: none">
     <button type="button" class="btn btn-warning" id='prefermine'>
-    Registrar minha tradução</button>
+    Зареєструвати мій переклад</button>
     <button type="button" class="btn btn-warning"
-    id='preferother'>Registrar a tradução de outro tradutor</button>
+    id='preferother'>Реєстрація перекладу від іншого перекладача</button>
   </div>
   </div>
   </div>
@@ -776,20 +776,20 @@
   <div class='modal-content'>
   <div class='modal-header'>
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">Há alterações não salvas</h4>
+    <h4 class="modal-title">Є незбережені зміни</h4>
   </div>
   <div class='modal-body'>
-    Há alterações não salvas na página, quer descarta-las
-    e voltar à lista de arquivos?
+    На сторінці є незбережені зміни, ви хочете їх відкинути
+    і повернутися до списку файлів?
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-success" data-dismiss="modal"
     onclick="$('#commitButton').click(); $('#backtofm').click()">
-    Salvar alterações</button>
+    Зберегти зміни</button>
     <button type="button" class="btn btn-warning" id='force-backtofm'
     data-dismiss="modal">
-    Descartar alterações</button>
-    <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+    Відкинути зміни</button>
+    <button type="button" class="btn btn-default" data-dismiss="modal">Скасувати</button>
   </div>
   </div>
   </div>
