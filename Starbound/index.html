@@ -117,7 +117,7 @@
     {
       var authinfo = document.getElementById('authorized')
       authinfo.style.display = ''
-      authinfo.innerHTML = "Logado como:"
+      authinfo.innerHTML = "Увійшов як:"
       var link = document.createElement('a')
       link.setAttribute('href', 'https://github.com/' + authdata.uname)
       link.innerHTML = udata.login
@@ -131,8 +131,8 @@
       var exitbutton = document.createElement('button')
       exitbutton.className = "btn btn-default"
       exitbutton.setAttribute('type', 'button')
-      exitbutton.innerHTML = "Sair"
-      exitbutton.title = "Sair"
+      exitbutton.innerHTML = "Вийти"
+      exitbutton.title = "Вийти"
       exitbutton.onclick = function() {unlogin(); location.reload()}
       idiv.appendChild(img)
       ldiv.appendChild(link)
