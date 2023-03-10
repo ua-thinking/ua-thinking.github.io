@@ -156,7 +156,7 @@
 
     function subscribe_notifications(account) {
       let thepopover = {
-        content: "Você tem notificações não lidas no github. <a target='_blank' id='readntf' href='https://github.com/notifications'>Ler...</a>",
+        content: "У вас є непрочитані сповіщення на github. <a target='_blank' id='readntf' href='https://github.com/notifications'>Прочитати...</a>",
         html: true,
         trigger: "none",
         placement: "bottom"}
@@ -481,7 +481,7 @@
         console.log(d)
         console.log(status)
         console.log(errorThrown)
-        $('#commitFailedText')[0].innerHTML = "<strong>Erro!</strong> Під час спроби " +
+        $('#commitFailedText')[0].innerHTML = "<strong>Помилка!</strong> Під час спроби " +
           "сталася помилка при збереженні змін: " +
           (errorThrown ? errorThrown: "невідома помилка" ) + " status: " +
           (status ? status: "невідомо" ) + ". Додаткова інформація:\n" +
