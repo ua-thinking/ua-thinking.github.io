@@ -11,26 +11,26 @@ const schema = {
     properties: {
       "Comment":{
         type: "string",
-        title: "Comentário"
+        title: "Коментар"
       },
       "DeniedAlternatives":{
         type: "array",
         format: "table",
-        title: "Traduções descartadas",
+        title: "Відкинуті переклади",
         options:{
           disable_array_add: false,
           disable_array_delete: false,
           collapsed: true
         },
         items: {
-          title: "Opção",
+          title: "Варіант",
           format: "text",
           type: "string",
         }
       },
       "Files":{
         type: "object",
-        title: "Usado em:",
+        title: "Використовується в:",
         format: "table",
         options:{
           collapsed: true,
@@ -52,14 +52,14 @@ const schema = {
                 disable_array_delete: true,
               },
               type: "string",
-              title: "Caminho dentro do json",
+              title: "Шлях всередині json",
               format: "url"
             }
           }
         }
       },
       "Texts":{
-        title: "Textos",
+        title: "Тексти",
         options:{
           disable_collapse: true,
           required: true
@@ -68,19 +68,19 @@ const schema = {
         properties: {
           "Eng":{
             type: "string",
-            title: "Texto em inglês",
+            title: "Текст англійською мовою",
             format: "textarea",
           },
-          "Por": {
+          "Ukr": {
             type: "string",
-            title: "Texto em português",
+            title: "Текст українською мовою",
             format: "textarea",
             options:{
               required: true
             },
           }
         },
-        default_properties: ["Por", "Eng"]
+        default_properties: ["Ukr", "Eng"]
       },//Texts
     }
   }
@@ -229,17 +229,17 @@ theEditor.prototype.generate_label_checker = function(ii, maxwidth, maxheight)
   let ed = this
   function after_check(diff)
   {
-    $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
+    $(ed.subeditors[ii].getEditor('root.Texts.Ukr').container)
       .find('#overflow-warning').remove()
     $(ed.subeditors[ii].root_container).find('#overflow-head').remove()
     if (diff > 0)
     {
       $(ed.subeditors[ii].root_container).addClass('alert-danger')
-      $(ed.subeditors[ii].getEditor('root.Texts.Por').container)
-        .append('<p id="overflow-warning">O texto é mais longo do que a janela!' +
+      $(ed.subeditors[ii].getEditor('root.Texts.Ukr').container)
+        .append('<p id="overflow-warning">Текст довший за вікно!' +
         ' Linhas extras: '+ diff +'!</p>')
       $(ed.subeditors[ii].root_container).children('h3')
-      .append('<span id="overflow-head">O texto é muito longo!</span>')
+      .append('<span id="overflow-head">Текст занадто довгий!</span>')
     }
     else
     {
@@ -248,7 +248,7 @@ theEditor.prototype.generate_label_checker = function(ii, maxwidth, maxheight)
   }
   return function(first)
   {
-    let curval = ed.subeditors[ii].getEditor('root.Texts.Por').getValue()
+    let curval = ed.subeditors[ii].getEditor('root.Texts.Ukr').getValue()
     check_label_length(curval, after_check, maxwidth, maxheight)
     ed.touched = true
     if (first){ ed.touched = false}
@@ -336,9 +336,9 @@ theEditor.prototype.load_part = function (start, selected)
   {
     var fixed_schema = schema
     var titletext = this.json[i]['Texts']['Eng']
-    if (! ('Por' in this.json[i]['Texts']))
+    if (! ('Ukr' in this.json[i]['Texts']))
     {
-      this.json[i]['Texts']['Por'] = ""
+      this.json[i]['Texts']['Ukr'] = ""
     }
     if (titletext.length > 20)
     {
@@ -364,8 +364,8 @@ theEditor.prototype.load_part = function (start, selected)
     }
     let ccheck = ed.generate_label_checker(i, 40, 17)
     ccheck(true)
-    subeditor.watch('root.Texts.Por', ccheck)
-    if (this.json[i]['Texts']['Por'] === "")
+    subeditor.watch('root.Texts.Ukr', ccheck)
+    if (this.json[i]['Texts']['Ukr'] === "")
     {
       subeditor.root_container.className += ' alert-info'
     }
@@ -449,11 +449,11 @@ theEditor.prototype.json_onload = function (data, gotopattern)
   {
     let texts = data[i]["Texts"]
     if (gotopattern && (texts["Eng"].match(gotopattern) ||
-        (texts["Por"] && texts["Por"].match(gotopattern)))){
+        (texts["Ukr"] && texts["Ukr"].match(gotopattern)))){
       target_pagestart = last_i
       target_i = i
     }
-    let translated = ("Por" in texts) && (texts["Por"].length > 0)
+    let translated = ("Ukr" in texts) && (texts["Ukr"].length > 0)
     has_untranslated = has_untranslated || !translated
     if (ii == editors_per_page - 1 | i == data.length - 1)
     {
