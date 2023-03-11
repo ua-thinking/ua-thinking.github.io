@@ -16,7 +16,7 @@ const schema = {
       "DeniedAlternatives":{
         type: "array",
         format: "table",
-        title: "Відкинуті переклади",
+        title: "Варіанти перекладу",
         options:{
           disable_array_add: false,
           disable_array_delete: false,
