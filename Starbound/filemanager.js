@@ -91,7 +91,7 @@ FileManager.prototype.track = function(path)
   for (let i in parts)
   {
     if (parts[i].length == 0)
-      parts[i] = 'Raiz'
+      parts[i] = 'Головна'
     if (curparts.length <= i)
     {
       $(this.navigator).append('<li>'+parts[i]+'</li>').children().last()
