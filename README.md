@@ -1,2 +1,2 @@
-https://uandreew.github.io/Starbound
+https://ua-thinking.github.io/Starbound
 
